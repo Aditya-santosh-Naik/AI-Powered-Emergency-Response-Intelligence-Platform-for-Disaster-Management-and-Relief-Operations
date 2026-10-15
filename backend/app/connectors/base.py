@@ -4,10 +4,11 @@ import abc
 import logging
 from datetime import UTC, datetime
 
-from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import DisasterEvent, IngestionRun
+
 
 logger = logging.getLogger(__name__)
 
@@ -68,28 +69,21 @@ class BaseConnector(abc.ABC):
                     normalized["source"] = self.source_name
                     normalized["raw_data"] = raw
 
-                    stmt = pg_insert(DisasterEvent).values(**normalized)
-                    stmt = stmt.on_conflict_on_constraint("uq_event_source_external_id").do_update(
-                        set_={
-                            "title": stmt.excluded.title,
-                            "description": stmt.excluded.description,
-                            "geometry": stmt.excluded.geometry,
-                            "magnitude": stmt.excluded.magnitude,
-                            "depth_km": stmt.excluded.depth_km,
-                            "alert_level": stmt.excluded.alert_level,
-                            "country": stmt.excluded.country,
-                            "ended_at": stmt.excluded.ended_at,
-                            "source_url": stmt.excluded.source_url,
-                            "raw_data": stmt.excluded.raw_data,
-                            "updated_at": datetime.now(UTC),
-                        }
+                    existing_stmt = select(DisasterEvent).where(
+                        DisasterEvent.source == self.source_name,
+                        DisasterEvent.external_id == normalized["external_id"],
                     )
-                    await db.execute(stmt)
-
-                    # asyncpg doesn't reliably report whether it was insert or update,
-                    # so we check if the row existed before. For simplicity, count all as created
-                    # on first run and updated on subsequent runs.
-                    result.created += 1
+                    res = await db.execute(existing_stmt)
+                    existing = res.scalar_one_or_none()
+                    if existing:
+                        for k, v in normalized.items():
+                            setattr(existing, k, v)
+                        existing.updated_at = datetime.now(UTC)
+                        result.updated += 1
+                    else:
+                        new_event = DisasterEvent(**normalized)
+                        db.add(new_event)
+                        result.created += 1
 
                 except Exception:
                     logger.exception("Failed to persist event from %s", self.source_name)
