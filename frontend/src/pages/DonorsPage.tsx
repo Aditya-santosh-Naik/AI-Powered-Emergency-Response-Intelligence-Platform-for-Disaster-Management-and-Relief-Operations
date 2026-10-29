@@ -8,9 +8,16 @@ import {
   Phone,
   Gift,
   X,
+  Package,
+  Calendar,
+  Layers,
 } from "lucide-react";
 import { api } from "../api/client";
 import type { Donor } from "../types";
+import { Button } from "../components/ui/Button";
+import { KpiTile } from "../components/ui/KpiTile";
+import { EmptyState } from "../components/ui/EmptyState";
+import { Badge } from "../components/ui/Badge";
 
 export const DonorsPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -52,6 +59,10 @@ export const DonorsPage: React.FC = () => {
     queryFn: api.getResourceTypes,
   });
 
+  // Calculate high-level KPIs
+  const totalUnitsDonated = donations.reduce((sum, d) => sum + (d.quantity || 0), 0);
+  const uniquePartnerOrgs = new Set(donors.map((d) => d.organization).filter(Boolean)).size;
+
   // Mutations
   const createDonorMutation = useMutation({
     mutationFn: api.createDonor,
@@ -82,10 +93,10 @@ export const DonorsPage: React.FC = () => {
     e.preventDefault();
     if (!donorName.trim()) return;
     createDonorMutation.mutate({
-      name: donorName,
-      organization: donorOrg || undefined,
-      email: donorEmail || undefined,
-      phone: donorPhone || undefined,
+      name: donorName.trim(),
+      organization: donorOrg.trim() || undefined,
+      email: donorEmail.trim() || undefined,
+      phone: donorPhone.trim() || undefined,
     });
   };
 
@@ -98,100 +109,175 @@ export const DonorsPage: React.FC = () => {
       resource_type_id: targetResourceTypeId,
       quantity: Number(donationQuantity),
       donated_at: new Date().toISOString(),
-      notes: donationNotes || undefined,
+      notes: donationNotes.trim() || undefined,
     });
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border-subtle pb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center space-x-2.5">
-            <HeartHandshake className="h-6 w-6 text-pink-500" />
-            <span>Donor Registry & Relief Aid Consignments</span>
-          </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Track humanitarian donors, bilateral aid partners, and log incoming supply consignments that automatically replenish depot inventory (Requirement D1).
-          </p>
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-lg bg-resource-medical/15 border border-resource-medical/30 flex items-center justify-center text-resource-medical">
+              <HeartHandshake className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight">
+                Donor Registry & Relief Consignments
+              </h1>
+              <p className="text-xs sm:text-sm text-text-muted mt-0.5">
+                Manage partner entities and log incoming aid consignments that automatically replenish depot inventory reserves.
+              </p>
+            </div>
+          </div>
         </div>
 
-        <button
+        <Button
           onClick={() => setIsAddDonorOpen(true)}
-          className="flex items-center space-x-2 bg-pink-600 hover:bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-lg shadow-pink-900/30 self-start"
+          variant="primary"
+          icon={Plus}
+          className="self-start md:self-auto"
         >
-          <Plus className="h-4 w-4" />
-          <span>Register Donor Entity</span>
-        </button>
+          Register Donor Entity
+        </Button>
       </div>
 
-      {/* Donors Grid */}
+      {/* KPI Overview Tiles */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <KpiTile
+          label="Registered Donors"
+          value={donors.length}
+          icon={Building2}
+          tone="accent"
+        />
+        <KpiTile
+          label="Consignments Logged"
+          value={donations.length}
+          icon={Gift}
+          tone="success"
+        />
+        <KpiTile
+          label="Total Units Donated"
+          value={totalUnitsDonated}
+          icon={Package}
+          tone="warning"
+        />
+        <KpiTile
+          label="Partner Organizations"
+          value={uniquePartnerOrgs}
+          icon={Layers}
+          tone="default"
+        />
+      </div>
+
+      {/* Registered Donors Grid */}
       <div className="space-y-4">
-        <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-          Registered Relief Donors ({donors.length})
-        </h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-text-primary uppercase tracking-wider">
+              Active Relief Donors
+            </h2>
+            <p className="text-xs text-text-muted">
+              {donors.length} humanitarian agencies, bilateral partners, and NGOs
+            </p>
+          </div>
+        </div>
 
         {donorsLoading ? (
-          <div className="p-12 text-center text-slate-400 bg-slate-900 rounded-xl border border-slate-800">
-            Loading donors...
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-40 rounded-xl bg-surface-2 animate-pulse border border-border-subtle" />
+            ))}
           </div>
         ) : donors.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 bg-slate-900 rounded-xl border border-slate-800">
-            No donors registered yet.
+          <div className="bg-surface-1 border border-border-subtle rounded-xl p-8">
+            <EmptyState
+              title="No donors registered yet"
+              description="Register international agencies, civil defense units, or commercial donors to log incoming relief shipments."
+              action={
+                <Button
+                  onClick={() => setIsAddDonorOpen(true)}
+                  variant="secondary"
+                  size="sm"
+                  icon={Plus}
+                >
+                  Register First Donor
+                </Button>
+              }
+            />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {donors.map((d) => (
               <div
                 key={d.id}
-                className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 shadow-xl flex flex-col justify-between"
+                className="bg-surface-1 border border-border-subtle rounded-xl p-5 space-y-4 shadow-sm hover:border-border-strong transition flex flex-col justify-between"
               >
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center space-x-2.5">
-                      <div className="h-9 w-9 rounded-lg bg-pink-950 border border-pink-800 flex items-center justify-center text-pink-400">
-                        <Building2 className="h-5 w-5" />
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start space-x-3">
+                      <div className="h-9 w-9 rounded-lg bg-surface-2 border border-border-subtle flex items-center justify-center text-accent shrink-0 mt-0.5">
+                        <Building2 className="h-4 w-4" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-white text-sm">{d.name}</h3>
-                        {d.organization && <p className="text-xs text-slate-400">{d.organization}</p>}
+                        <h3 className="font-semibold text-text-primary text-sm leading-snug">
+                          {d.name}
+                        </h3>
+                        {d.organization ? (
+                          <span className="text-xs text-text-muted inline-block mt-0.5">
+                            {d.organization}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-text-dim italic">Individual Donor</span>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-3.5 space-y-1.5 text-xs text-slate-400">
-                    {d.email && (
-                      <div className="flex items-center space-x-2">
-                        <Mail className="h-3.5 w-3.5 text-slate-500" />
-                        <span className="font-mono">{d.email}</span>
+                  <div className="pt-2 space-y-1.5 text-xs text-text-muted border-t border-border-subtle">
+                    {d.email ? (
+                      <div className="flex items-center space-x-2 truncate">
+                        <Mail className="h-3.5 w-3.5 text-text-dim shrink-0" />
+                        <span className="font-mono text-text-secondary truncate">{d.email}</span>
                       </div>
-                    )}
-                    {d.phone && (
+                    ) : null}
+                    {d.phone ? (
                       <div className="flex items-center space-x-2">
-                        <Phone className="h-3.5 w-3.5 text-slate-500" />
-                        <span className="font-mono">{d.phone}</span>
+                        <Phone className="h-3.5 w-3.5 text-text-dim shrink-0" />
+                        <span className="font-mono text-text-secondary">{d.phone}</span>
                       </div>
+                    ) : null}
+                    {!d.email && !d.phone && (
+                      <span className="text-[11px] text-text-dim">No direct contact listed</span>
                     )}
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
-                  <span className="text-[11px] text-slate-500">
-                    Partner since {new Date(d.created_at).toLocaleDateString()}
+                <div className="pt-3 border-t border-border-subtle flex items-center justify-between text-xs">
+                  <span className="text-[11px] text-text-dim flex items-center gap-1 font-mono">
+                    <Calendar className="h-3 w-3" />
+                    {new Date(d.created_at).toLocaleDateString([], {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
                   </span>
 
-                  <button
+                  <Button
                     onClick={() => {
                       setSelectedDonorForDonation(d);
                       setTargetDepotId(depots[0]?.id || "");
                       setTargetResourceTypeId(resourceTypes[0]?.id || "");
                       setIsRecordDonationOpen(true);
                     }}
-                    className="flex items-center space-x-1.5 text-xs bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30 px-3 py-1.5 rounded-lg transition font-medium"
+                    variant="ghost"
+                    size="sm"
+                    icon={Gift}
+                    className="text-accent hover:text-accent-hover hover:bg-accent/10"
                   >
-                    <Gift className="h-3.5 w-3.5" />
-                    <span>Record Donation</span>
-                  </button>
+                    Record Donation
+                  </Button>
                 </div>
               </div>
             ))}
@@ -201,49 +287,70 @@ export const DonorsPage: React.FC = () => {
 
       {/* Recent Donations Table */}
       <div className="space-y-4">
-        <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-          Aid Consignments Logged ({donations.length})
-        </h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-text-primary uppercase tracking-wider">
+              Consignment Audit Log
+            </h2>
+            <p className="text-xs text-text-muted">
+              {donations.length} incoming supply batches logged and verified across all regional depots
+            </p>
+          </div>
+        </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+        <div className="bg-surface-1 border border-border-subtle rounded-xl overflow-hidden shadow-sm">
           {donationsLoading ? (
-            <div className="p-8 text-center text-slate-400 text-sm">Loading consignment records...</div>
+            <div className="p-8 text-center text-text-muted text-sm">
+              Loading consignment records...
+            </div>
           ) : donations.length === 0 ? (
-            <div className="p-8 text-center text-slate-400 text-sm">No donations logged yet.</div>
+            <div className="p-8">
+              <EmptyState
+                title="No consignments recorded"
+                description="When donors provide relief supplies, record the batch here to automatically increment target depot stocks."
+              />
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="bg-slate-950/80 text-slate-400 uppercase text-[11px] font-semibold tracking-wider border-b border-slate-800">
+                <thead className="bg-surface-2 text-text-muted uppercase text-[11px] font-semibold tracking-wider border-b border-border-subtle">
                   <tr>
                     <th className="py-3 px-4">Consignment Resource</th>
                     <th className="py-3 px-4">Quantity</th>
                     <th className="py-3 px-4">Destination Depot</th>
                     <th className="py-3 px-4">Date Logged</th>
-                    <th className="py-3 px-4">Notes</th>
+                    <th className="py-3 px-4">Notes / Grant ID</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60 text-slate-200">
+                <tbody className="divide-y divide-border-subtle text-text-secondary">
                   {donations.map((d) => {
                     const depotObj = depots.find((dep) => dep.id === d.depot_id);
+                    const formattedResource = d.resource_type_name?.replace(/_/g, " ") || "Supplies";
                     return (
-                      <tr key={d.id} className="hover:bg-slate-800/40 transition">
-                        <td className="py-3 px-4 font-semibold text-white capitalize">
-                          {d.resource_type_name?.replace("_", " ") || "Supplies"}
+                      <tr key={d.id} className="hover:bg-surface-2/40 transition">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="info">
+                              {formattedResource}
+                            </Badge>
+                          </div>
                         </td>
-                        <td className="py-3 px-4 font-mono font-bold text-emerald-400">
+                        <td className="py-3 px-4 font-mono font-bold text-semantic-low tabular-nums">
                           +{d.quantity.toLocaleString()}
                         </td>
-                        <td className="py-3 px-4 text-xs text-slate-300">
+                        <td className="py-3 px-4 text-xs text-text-primary font-medium">
                           {depotObj?.name || "Logistics Depot"}
                         </td>
-                        <td className="py-3 px-4 text-xs text-slate-400 font-mono">
+                        <td className="py-3 px-4 text-xs text-text-muted font-mono">
                           {new Date(d.donated_at).toLocaleDateString([], {
                             year: "numeric",
                             month: "short",
                             day: "numeric",
                           })}
                         </td>
-                        <td className="py-3 px-4 text-xs text-slate-400">{d.notes || "—"}</td>
+                        <td className="py-3 px-4 text-xs text-text-muted max-w-xs truncate">
+                          {d.notes || "—"}
+                        </td>
                       </tr>
                     );
                   })}
@@ -257,55 +364,65 @@ export const DonorsPage: React.FC = () => {
       {/* Record Donation Modal */}
       {isRecordDonationOpen && selectedDonorForDonation && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div className="flex items-start justify-between border-b border-slate-800 pb-3">
+          <div className="bg-surface-1 border border-border-strong rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-fade-in">
+            <div className="flex items-start justify-between border-b border-border-subtle pb-3">
               <div>
-                <h3 className="text-lg font-bold text-white">Record Aid Consignment</h3>
-                <p className="text-xs text-slate-400">From: {selectedDonorForDonation.name}</p>
+                <h3 className="text-base font-bold text-text-primary">Record Aid Consignment</h3>
+                <p className="text-xs text-text-muted mt-0.5">
+                  Donor: <span className="text-text-secondary font-medium">{selectedDonorForDonation.name}</span>
+                </p>
               </div>
               <button
+                type="button"
                 onClick={() => setIsRecordDonationOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+                className="text-text-muted hover:text-text-primary p-1 rounded-lg hover:bg-surface-2 transition"
+                aria-label="Close dialog"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleRecordDonation} className="space-y-3.5">
+            <form onSubmit={handleRecordDonation} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Target Logistics Depot</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Destination Logistics Depot
+                </label>
                 <select
                   required
                   value={targetDepotId}
                   onChange={(e) => setTargetDepotId(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-surface-2 border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent"
                 >
                   {depots.map((dep) => (
                     <option key={dep.id} value={dep.id}>
-                      {dep.name}
+                      {dep.name} ({dep.address || "HQ"})
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Resource Item Category</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Resource Item Category
+                </label>
                 <select
                   required
                   value={targetResourceTypeId}
                   onChange={(e) => setTargetResourceTypeId(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-surface-2 border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent"
                 >
                   {resourceTypes.map((rt) => (
                     <option key={rt.id} value={rt.id}>
-                      {rt.name.replace("_", " ")} ({rt.unit})
+                      {rt.name.replace(/_/g, " ")} ({rt.unit})
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Quantity Donated</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Quantity Donated
+                </label>
                 <input
                   type="number"
                   min="1"
@@ -313,36 +430,39 @@ export const DonorsPage: React.FC = () => {
                   value={donationQuantity || ""}
                   onChange={(e) => setDonationQuantity(parseInt(e.target.value) || 0)}
                   placeholder="e.g. 5000"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-blue-500"
+                  className="w-full bg-surface-2 border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary font-mono tabular-nums focus:outline-none focus:border-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Notes / Grant Identifier</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Notes / Grant Identifier
+                </label>
                 <input
                   type="text"
                   value={donationNotes}
                   onChange={(e) => setDonationNotes(e.target.value)}
-                  placeholder="e.g. Emergency monsoon aid shipment"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+                  placeholder="e.g. Emergency monsoon aid shipment #IN-482"
+                  className="w-full bg-surface-2 border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent"
                 />
               </div>
 
-              <div className="flex justify-end space-x-3 pt-3">
-                <button
+              <div className="flex justify-end space-x-3 pt-3 border-t border-border-subtle">
+                <Button
                   type="button"
+                  variant="ghost"
                   onClick={() => setIsRecordDonationOpen(false)}
-                  className="px-4 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
+                  variant="primary"
+                  loading={recordDonationMutation.isPending}
                   disabled={recordDonationMutation.isPending || donationQuantity <= 0}
-                  className="bg-pink-600 hover:bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50"
                 >
-                  {recordDonationMutation.isPending ? "Recording..." : "Log & Increment Depot Stock"}
-                </button>
+                  Log & Increment Depot Stock
+                </Button>
               </div>
             </form>
           </div>
@@ -352,78 +472,94 @@ export const DonorsPage: React.FC = () => {
       {/* Add Donor Modal */}
       {isAddDonorOpen && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div className="flex items-start justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white">Register Donor Partner</h3>
+          <div className="bg-surface-1 border border-border-strong rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-fade-in">
+            <div className="flex items-start justify-between border-b border-border-subtle pb-3">
+              <div>
+                <h3 className="text-base font-bold text-text-primary">Register Donor Partner</h3>
+                <p className="text-xs text-text-muted mt-0.5">
+                  Add an accredited institutional or NGO relief partner
+                </p>
+              </div>
               <button
+                type="button"
                 onClick={() => setIsAddDonorOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+                className="text-text-muted hover:text-text-primary p-1 rounded-lg hover:bg-surface-2 transition"
+                aria-label="Close dialog"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateDonor} className="space-y-3.5">
+            <form onSubmit={handleCreateDonor} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Entity / Donor Name</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Entity / Contact Name <span className="text-semantic-critical">*</span>
+                </label>
                 <input
                   type="text"
                   required
                   value={donorName}
                   onChange={(e) => setDonorName(e.target.value)}
                   placeholder="e.g. World Food Programme India"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-surface-2 border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Organization / Department</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Organization / Department
+                </label>
                 <input
                   type="text"
                   value={donorOrg}
                   onChange={(e) => setDonorOrg(e.target.value)}
                   placeholder="e.g. Humanitarian Logistics Branch"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-surface-2 border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Email</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Email
+                </label>
                 <input
                   type="email"
                   value={donorEmail}
                   onChange={(e) => setDonorEmail(e.target.value)}
                   placeholder="e.g. logistics@partner.org"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-surface-2 border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Contact Phone</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Contact Phone
+                </label>
                 <input
                   type="tel"
                   value={donorPhone}
                   onChange={(e) => setDonorPhone(e.target.value)}
                   placeholder="e.g. +91-11-20000000"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-surface-2 border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent"
                 />
               </div>
 
-              <div className="flex justify-end space-x-3 pt-3">
-                <button
+              <div className="flex justify-end space-x-3 pt-3 border-t border-border-subtle">
+                <Button
                   type="button"
+                  variant="ghost"
                   onClick={() => setIsAddDonorOpen(false)}
-                  className="px-4 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  disabled={createDonorMutation.isPending}
-                  className="bg-pink-600 hover:bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50"
+                  variant="primary"
+                  loading={createDonorMutation.isPending}
+                  disabled={createDonorMutation.isPending || !donorName.trim()}
                 >
-                  {createDonorMutation.isPending ? "Saving..." : "Save Donor"}
-                </button>
+                  Save Donor
+                </Button>
               </div>
             </form>
           </div>

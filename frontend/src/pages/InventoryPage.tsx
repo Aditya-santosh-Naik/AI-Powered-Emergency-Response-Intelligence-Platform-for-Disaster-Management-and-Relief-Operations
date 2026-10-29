@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { api } from "../api/client";
 import type { Depot } from "../types";
+import { Button } from "../components/ui/Button";
+import { EmptyState } from "../components/ui/EmptyState";
 
 export const InventoryPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -94,17 +96,17 @@ export const InventoryPage: React.FC = () => {
   const getResourceIcon = (name: string) => {
     switch (name) {
       case "food_packets":
-        return <PackageCheck className="h-5 w-5 text-amber-400" />;
+        return <PackageCheck className="h-4 w-4 text-amber-400" />;
       case "water":
-        return <Droplet className="h-5 w-5 text-blue-400" />;
+        return <Droplet className="h-4 w-4 text-sky-400" />;
       case "medical_kits":
-        return <HeartPulse className="h-5 w-5 text-red-400" />;
+        return <HeartPulse className="h-4 w-4 text-pink-400" />;
       case "rescue_vehicles":
-        return <Truck className="h-5 w-5 text-purple-400" />;
+        return <Truck className="h-4 w-4 text-purple-400" />;
       case "personnel":
-        return <Users className="h-5 w-5 text-emerald-400" />;
+        return <Users className="h-4 w-4 text-emerald-400" />;
       default:
-        return <Boxes className="h-5 w-5 text-slate-400" />;
+        return <Boxes className="h-4 w-4 text-qc-text-tertiary" />;
     }
   };
 
@@ -138,48 +140,60 @@ export const InventoryPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 text-qc-text-primary">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-qc-border-subtle">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center space-x-2.5">
-            <Boxes className="h-6 w-6 text-blue-500" />
-            <span>Resource Inventory Management</span>
-          </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Track supplies, logistics depots, and real-time depot stock across 5 core emergency resource categories (R3).
+          <div className="flex items-center space-x-2.5 mb-1">
+            <div className="w-8 h-8 rounded-lg bg-sky-950/60 border border-sky-800/80 flex items-center justify-center text-qc-accent">
+              <Boxes className="h-4 w-4" />
+            </div>
+            <h1 className="text-xl font-bold tracking-tight text-qc-text-primary">
+              Logistics & Stock Inventory
+            </h1>
+            <span className="text-xs font-mono px-2 py-0.5 rounded bg-qc-surface-2 text-qc-text-secondary border border-qc-border-subtle">
+              R3 LOGISTICS
+            </span>
+          </div>
+          <p className="text-xs text-qc-text-secondary max-w-2xl leading-relaxed">
+            Track strategic regional relief depots and live stockpile levels across 5 essential disaster supply classifications with non-negative constraints.
           </p>
         </div>
 
-        <button
+        <Button
+          variant="primary"
+          size="sm"
+          icon={Plus}
           onClick={() => setIsAddDepotOpen(true)}
-          className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-lg shadow-blue-900/30 self-start"
         >
-          <Plus className="h-4 w-4" />
-          <span>Add Logistics Depot</span>
-        </button>
+          Add Logistics Depot
+        </Button>
       </div>
 
       {/* Aggregate Inventory Totals Cards */}
       <div>
-        <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-          Network Aggregate Supply Totals
+        <h2 className="text-[11px] font-mono font-semibold text-qc-text-tertiary uppercase tracking-wider mb-3">
+          Network Aggregate Stock Totals
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
           {summary.map((item) => (
             <div
               key={item.resource_type_id}
-              className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between shadow-lg"
+              className="bg-qc-surface-1 border border-qc-border-subtle rounded-xl p-4 flex flex-col justify-between shadow-md"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-400">{formatResourceLabel(item.resource_type_name)}</span>
+                <span className="text-xs font-medium text-qc-text-secondary">
+                  {formatResourceLabel(item.resource_type_name)}
+                </span>
                 {getResourceIcon(item.resource_type_name)}
               </div>
               <div className="mt-3">
-                <div className="text-2xl font-bold font-mono text-white">
+                <div className="text-2xl font-bold font-sans text-qc-text-primary tabular-nums">
                   {item.total_quantity.toLocaleString()}
                 </div>
-                <div className="text-[11px] text-slate-500 font-mono mt-0.5">{item.resource_type_unit}</div>
+                <div className="text-[10px] text-qc-text-tertiary font-mono mt-0.5">
+                  {item.resource_type_unit}
+                </div>
               </div>
             </div>
           ))}
@@ -188,58 +202,74 @@ export const InventoryPage: React.FC = () => {
 
       {/* Logistics Depots Section */}
       <div className="space-y-4">
-        <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+        <h2 className="text-[11px] font-mono font-semibold text-qc-text-tertiary uppercase tracking-wider">
           Strategic Logistics Depots ({depots.length})
         </h2>
 
         {depotsLoading ? (
-          <div className="p-12 text-center text-slate-400 bg-slate-900 rounded-xl border border-slate-800">
-            Loading depots...
+          <div className="p-12 text-center text-xs text-qc-text-tertiary bg-qc-surface-1 rounded-xl border border-qc-border-subtle">
+            Loading logistics depots...
           </div>
         ) : depots.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 bg-slate-900 rounded-xl border border-slate-800">
-            No depots recorded. Click "Add Logistics Depot" to create one.
-          </div>
+          <EmptyState
+            title="No Depots Registered"
+            description="No logistics facilities found. Click 'Add Logistics Depot' to register a regional relief staging depot."
+            action={
+              <Button
+                variant="primary"
+                size="sm"
+                icon={Plus}
+                onClick={() => setIsAddDepotOpen(true)}
+              >
+                Register Depot
+              </Button>
+            }
+          />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {depots.map((d) => (
               <div
                 key={d.id}
-                className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 shadow-xl flex flex-col justify-between"
+                className="bg-qc-surface-1 border border-qc-border-subtle rounded-xl p-5 space-y-4 shadow-lg flex flex-col justify-between hover:border-qc-border-strong transition"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center space-x-2.5">
-                      <div className="h-8 w-8 rounded-lg bg-blue-950 border border-blue-800 flex items-center justify-center text-blue-400">
+                      <div className="h-8 w-8 rounded-lg bg-qc-surface-2 border border-qc-border-strong flex items-center justify-center text-qc-accent">
                         <Warehouse className="h-4 w-4" />
                       </div>
-                      <h3 className="font-bold text-white text-sm">{d.name}</h3>
+                      <h3 className="font-semibold text-qc-text-primary text-sm leading-snug">{d.name}</h3>
                     </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-800 text-emerald-400 uppercase">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-700/80 text-emerald-300 uppercase">
                       {d.status}
                     </span>
                   </div>
 
-                  {d.address && <p className="text-xs text-slate-400 mt-2.5">{d.address}</p>}
+                  {d.address && (
+                    <p className="text-xs text-qc-text-secondary mt-2.5 leading-relaxed">
+                      {d.address}
+                    </p>
+                  )}
 
-                  <div className="text-[11px] font-mono text-slate-500 mt-2">
+                  <div className="text-[10px] font-mono text-qc-text-tertiary mt-2">
                     Coordinates: {d.latitude.toFixed(4)}, {d.longitude.toFixed(4)}
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
-                  <button
+                <div className="pt-3 border-t border-qc-border-subtle flex items-center justify-between">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    icon={ArrowUpDown}
                     onClick={() => {
                       setAdjustingDepot(d);
                       setSelectedResourceType(resourceTypes[0]?.id || "");
                       setQuantityDelta(0);
                       setAdjustError(null);
                     }}
-                    className="flex items-center space-x-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg transition"
                   >
-                    <ArrowUpDown className="h-3.5 w-3.5 text-blue-400" />
-                    <span>Adjust Stock</span>
-                  </button>
+                    Adjust Stock
+                  </Button>
 
                   <button
                     onClick={() => {
@@ -247,7 +277,7 @@ export const InventoryPage: React.FC = () => {
                         deleteDepotMutation.mutate(d.id);
                       }
                     }}
-                    className="text-slate-500 hover:text-red-400 p-1.5 rounded-lg hover:bg-slate-800 transition"
+                    className="text-qc-text-tertiary hover:text-red-400 p-1.5 rounded-md hover:bg-qc-surface-2 transition"
                     title="Delete Depot"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -261,16 +291,16 @@ export const InventoryPage: React.FC = () => {
 
       {/* Adjust Stock Modal */}
       {adjustingDepot && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
-            <div className="flex items-start justify-between border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-qc-surface-1 border border-qc-border-strong rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between border-b border-qc-border-subtle pb-3">
               <div>
-                <h3 className="text-lg font-bold text-white">Adjust Depot Stock</h3>
-                <p className="text-xs text-slate-400 mt-0.5">{adjustingDepot.name}</p>
+                <h3 className="text-base font-bold text-qc-text-primary">Adjust Depot Stock</h3>
+                <p className="text-xs text-qc-text-secondary mt-0.5">{adjustingDepot.name}</p>
               </div>
               <button
                 onClick={() => setAdjustingDepot(null)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+                className="text-qc-text-tertiary hover:text-qc-text-primary p-1 rounded-md hover:bg-qc-surface-2"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -278,14 +308,14 @@ export const InventoryPage: React.FC = () => {
 
             {/* Current Depot Inventory List */}
             <div className="space-y-2">
-              <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <div className="text-[10px] font-mono font-semibold text-qc-text-tertiary uppercase tracking-wider">
                 Current On-Hand Quantities
               </div>
-              <div className="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <div className="grid grid-cols-2 gap-2 bg-qc-surface-2 p-3 rounded-xl border border-qc-border-subtle">
                 {depotInventory.map((item) => (
-                  <div key={item.id} className="flex justify-between items-center text-xs p-1.5">
-                    <span className="text-slate-400">{formatResourceLabel(item.resource_type_name || "")}:</span>
-                    <span className="font-mono font-bold text-white">
+                  <div key={item.id} className="flex justify-between items-center text-xs p-1">
+                    <span className="text-qc-text-secondary">{formatResourceLabel(item.resource_type_name || "")}:</span>
+                    <span className="font-mono font-bold text-qc-text-primary tabular-nums">
                       {item.quantity.toLocaleString()} {item.resource_type_unit}
                     </span>
                   </div>
@@ -296,14 +326,16 @@ export const InventoryPage: React.FC = () => {
             {/* Adjustment Form */}
             <form onSubmit={handleAdjustSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">Resource Category</label>
+                <label className="block text-xs font-medium text-qc-text-secondary mb-1.5">
+                  Resource Category
+                </label>
                 <select
                   value={selectedResourceType}
                   onChange={(e) => setSelectedResourceType(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-qc-surface-2 border border-qc-border-subtle rounded-md px-3 py-2 text-xs text-qc-text-primary focus:outline-none focus:border-qc-accent"
                 >
                   {resourceTypes.map((rt) => (
-                    <option key={rt.id} value={rt.id}>
+                    <option key={rt.id} value={rt.id} className="bg-qc-surface-2">
                       {formatResourceLabel(rt.name)} ({rt.unit})
                     </option>
                   ))}
@@ -311,43 +343,46 @@ export const InventoryPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Quantity Adjustment (positive to add stock, negative to dispatch/consume)
+                <label className="block text-xs font-medium text-qc-text-secondary mb-1.5">
+                  Quantity Adjustment (positive to replenish, negative to dispatch)
                 </label>
                 <input
                   type="number"
                   value={quantityDelta || ""}
-                  onChange={(e) => setQuantityDelta(parseInt(e.target.value) || 0)}
+                  onChange={(e) => setQuantityDelta(parseInt(e.target.value, 10) || 0)}
                   placeholder="e.g. 500 or -250"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-blue-500"
+                  className="w-full bg-qc-surface-2 border border-qc-border-subtle rounded-md px-3 py-2 text-xs text-qc-text-primary font-mono focus:outline-none focus:border-qc-accent"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Enforces non-negative constraint: negative adjustments exceeding on-hand stock are strictly rejected (Requirement R3.4).
+                <p className="text-[11px] text-qc-text-tertiary mt-1 leading-relaxed">
+                  Strict non-negative constraint: transactions reducing stock below zero are immediately rejected by database constraint (Requirement R3.4).
                 </p>
               </div>
 
               {adjustError && (
-                <div className="flex items-center space-x-2 p-3 rounded-lg bg-red-950/80 border border-red-800 text-red-300 text-xs">
+                <div className="flex items-center space-x-2 p-3 rounded-lg bg-red-950/60 border border-red-800 text-red-300 text-xs">
                   <AlertCircle className="h-4 w-4 shrink-0" />
                   <span>{adjustError}</span>
                 </div>
               )}
 
-              <div className="flex justify-end space-x-3 pt-2">
-                <button
+              <div className="flex justify-end space-x-2.5 pt-2 border-t border-qc-border-subtle">
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setAdjustingDepot(null)}
-                  className="px-4 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition"
                 >
-                  Close
-                </button>
-                <button
+                  Cancel
+                </Button>
+                <Button
                   type="submit"
-                  disabled={adjustStockMutation.isPending || quantityDelta === 0}
-                  className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50"
+                  variant="primary"
+                  size="sm"
+                  loading={adjustStockMutation.isPending}
+                  disabled={quantityDelta === 0}
                 >
-                  {adjustStockMutation.isPending ? "Applying..." : "Confirm Adjustment"}
-                </button>
+                  Confirm Stock Adjustment
+                </Button>
               </div>
             </form>
           </div>
@@ -356,13 +391,13 @@ export const InventoryPage: React.FC = () => {
 
       {/* Add Depot Modal */}
       {isAddDepotOpen && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div className="flex items-start justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white">Create New Logistics Depot</h3>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-qc-surface-1 border border-qc-border-strong rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between border-b border-qc-border-subtle pb-3">
+              <h3 className="text-base font-bold text-qc-text-primary">Create New Logistics Depot</h3>
               <button
                 onClick={() => setIsAddDepotOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+                className="text-qc-text-tertiary hover:text-qc-text-primary p-1 rounded-md hover:bg-qc-surface-2"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -370,20 +405,20 @@ export const InventoryPage: React.FC = () => {
 
             <form onSubmit={handleCreateDepot} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Depot Facility Name</label>
+                <label className="block text-xs font-medium text-qc-text-secondary mb-1">Facility Name</label>
                 <input
                   type="text"
                   required
                   value={newDepotName}
                   onChange={(e) => setNewDepotName(e.target.value)}
                   placeholder="e.g. Northern Regional Staging Depot"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-qc-surface-2 border border-qc-border-subtle rounded-md px-3 py-1.5 text-xs text-qc-text-primary focus:outline-none focus:border-qc-accent"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Latitude</label>
+                  <label className="block text-xs font-medium text-qc-text-secondary mb-1">Latitude</label>
                   <input
                     type="number"
                     step="0.0001"
@@ -391,11 +426,11 @@ export const InventoryPage: React.FC = () => {
                     value={newDepotLat}
                     onChange={(e) => setNewDepotLat(e.target.value)}
                     placeholder="26.1445"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-blue-500"
+                    className="w-full bg-qc-surface-2 border border-qc-border-subtle rounded-md px-3 py-1.5 text-xs text-qc-text-primary font-mono focus:outline-none focus:border-qc-accent"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Longitude</label>
+                  <label className="block text-xs font-medium text-qc-text-secondary mb-1">Longitude</label>
                   <input
                     type="number"
                     step="0.0001"
@@ -403,37 +438,39 @@ export const InventoryPage: React.FC = () => {
                     value={newDepotLon}
                     onChange={(e) => setNewDepotLon(e.target.value)}
                     placeholder="91.7362"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-blue-500"
+                    className="w-full bg-qc-surface-2 border border-qc-border-subtle rounded-md px-3 py-1.5 text-xs text-qc-text-primary font-mono focus:outline-none focus:border-qc-accent"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Facility Address / Location</label>
+                <label className="block text-xs font-medium text-qc-text-secondary mb-1">Facility Address</label>
                 <input
                   type="text"
                   value={newDepotAddress}
                   onChange={(e) => setNewDepotAddress(e.target.value)}
                   placeholder="e.g. Industrial Area, Beltola"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-qc-surface-2 border border-qc-border-subtle rounded-md px-3 py-1.5 text-xs text-qc-text-primary focus:outline-none focus:border-qc-accent"
                 />
               </div>
 
-              <div className="flex justify-end space-x-3 pt-3">
-                <button
+              <div className="flex justify-end space-x-2.5 pt-3 border-t border-qc-border-subtle">
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setIsAddDepotOpen(false)}
-                  className="px-4 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  disabled={createDepotMutation.isPending}
-                  className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50"
+                  variant="primary"
+                  size="sm"
+                  loading={createDepotMutation.isPending}
                 >
-                  {createDepotMutation.isPending ? "Creating..." : "Save Depot"}
-                </button>
+                  Save Depot
+                </Button>
               </div>
             </form>
           </div>
