@@ -6,6 +6,11 @@ import { MapPage } from "./pages/MapPage";
 import { EventsPage } from "./pages/EventsPage";
 import { InventoryPage } from "./pages/InventoryPage";
 import { DonorsPage } from "./pages/DonorsPage";
+import { PredictionsPage } from "./pages/PredictionsPage";
+
+import { AuthProvider } from "./context/AuthContext";
+import { ReportDisasterPage } from "./pages/ReportDisasterPage";
+import { AdminDashboardPage } from "./pages/AdminDashboardPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,20 +25,25 @@ const queryClient = new QueryClient({
 export const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <div className="min-h-screen bg-slate-950 flex flex-col font-sans">
-          <Navbar />
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<MapPage />} />
-              <Route path="/events" element={<EventsPage />} />
-              <Route path="/inventory" element={<InventoryPage />} />
-              <Route path="/donors" element={<DonorsPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-        </div>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <div className="min-h-screen bg-qc-bg text-qc-text-primary flex flex-col font-sans selection:bg-qc-accent/20 selection:text-qc-accent">
+            <Navbar />
+            <main className="flex-1 flex flex-col">
+              <Routes>
+                <Route path="/" element={<MapPage />} />
+                <Route path="/events" element={<EventsPage />} />
+                <Route path="/predictions" element={<PredictionsPage />} />
+                <Route path="/inventory" element={<InventoryPage />} />
+                <Route path="/donors" element={<DonorsPage />} />
+                <Route path="/report" element={<ReportDisasterPage />} />
+                <Route path="/admin" element={<AdminDashboardPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </main>
+          </div>
+        </BrowserRouter>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

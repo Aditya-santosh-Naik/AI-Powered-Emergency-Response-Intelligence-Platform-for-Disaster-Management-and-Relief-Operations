@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="160" height="120" fill="none">
+  <!-- Subtle circular radar echo in background -->
+  <circle cx="80" cy="60" r="45" stroke="#33466F" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/>
+  <circle cx="80" cy="60" r="28" stroke="#33466F" stroke-width="1" opacity="0.4"/>
+  <!-- Clipboard -->
+  <rect x="52" y="30" width="56" height="66" rx="6" fill="#111A2D" stroke="#33466F" stroke-width="1.5"/>
+  <!-- Clipboard top clip -->
+  <rect x="68" y="24" width="24" height="12" rx="3" fill="#17233A" stroke="#38BDF8" stroke-width="1.5"/>
+  <circle cx="80" cy="30" r="2" fill="#38BDF8"/>
+  <!-- Internal checklist lines -->
+  <line x1="64" y1="48" x2="96" y2="48" stroke="#33466F" stroke-width="2" stroke-linecap="round"/>
+  <line x1="64" y1="60" x2="88" y2="60" stroke="#33466F" stroke-width="2" stroke-linecap="round"/>
+  <line x1="64" y1="72" x2="92" y2="72" stroke="#33466F" stroke-width="2" stroke-linecap="round"/>
+  <line x1="64" y1="84" x2="78" y2="84" stroke="#38BDF8" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+</svg>

@@ -23,11 +23,11 @@ export const StatusStrip: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-900/90 border-b border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between text-xs text-slate-300">
+    <div className="bg-qc-sidebar border-b border-qc-border-subtle px-4 py-2 flex flex-wrap items-center justify-between text-xs text-qc-text-secondary">
       <div className="flex items-center space-x-2">
-        <Radio className="h-3.5 w-3.5 text-blue-400 animate-pulse" />
-        <span className="font-semibold text-slate-200 uppercase tracking-wider text-[11px]">
-          Live Ingestion Feeds:
+        <Radio className="h-3.5 w-3.5 text-qc-accent animate-pulse" />
+        <span className="font-semibold text-qc-text-primary uppercase tracking-wider text-[11px] font-mono">
+          Operational Ingestion Feeds:
         </span>
       </div>
 
@@ -39,29 +39,31 @@ export const StatusStrip: React.FC = () => {
 
           return (
             <div key={src} className="flex items-center space-x-1.5">
-              <span className="font-mono font-medium text-slate-400">{src}:</span>
+              <span className="font-mono font-medium text-qc-text-tertiary">{src}:</span>
               {run ? (
                 <div className="flex items-center space-x-1">
                   {isError ? (
-                    <span className="text-red-400 flex items-center space-x-0.5">
+                    <span className="text-red-400 flex items-center space-x-0.5 font-mono text-[11px]">
                       <AlertCircle className="h-3 w-3" />
                       <span>Err</span>
                     </span>
                   ) : (
-                    <span className="text-emerald-400 flex items-center space-x-0.5">
+                    <span className="text-emerald-400 flex items-center space-x-0.5 font-mono text-[11px] tabular-nums">
                       <CheckCircle className="h-3 w-3" />
                       <span>{run.records_created + run.records_updated} rec</span>
                     </span>
                   )}
-                  <span className="text-[10px] text-slate-400">({formatTime(run.started_at)})</span>
+                  <span className="text-[10px] text-qc-text-tertiary font-mono">
+                    ({formatTime(run.started_at)})
+                  </span>
                 </div>
               ) : (
-                <span className="text-slate-400">Idle</span>
+                <span className="text-qc-text-disabled text-[11px] font-mono">Idle</span>
               )}
 
               {isSample && (
-                <span className="text-[10px] px-1 py-0.2 bg-amber-950/70 border border-amber-800 text-amber-300 rounded font-mono">
-                  Sample Fixture
+                <span className="text-[9px] px-1 py-0.5 bg-amber-950/60 border border-amber-800/80 text-amber-300 rounded font-mono">
+                  Sample
                 </span>
               )}
             </div>

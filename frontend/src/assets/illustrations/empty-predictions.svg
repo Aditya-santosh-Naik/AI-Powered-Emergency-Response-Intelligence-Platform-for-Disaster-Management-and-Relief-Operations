@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="160" height="120" fill="none">
+  <!-- Subtle circular radar echo in background -->
+  <circle cx="80" cy="56" r="46" stroke="#33466F" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/>
+  <!-- Baseline axis -->
+  <line x1="36" y1="88" x2="124" y2="88" stroke="#33466F" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Target bar 1 (Food) -->
+  <rect x="46" y="52" width="12" height="36" rx="2" fill="#17233A" stroke="#38BDF8" stroke-width="1.25"/>
+  <line x1="42" y1="46" x2="62" y2="46" stroke="#38BDF8" stroke-width="1" stroke-dasharray="2 2" opacity="0.6"/>
+  <!-- Target bar 2 (Water) -->
+  <rect x="64" y="38" width="12" height="50" rx="2" fill="#17233A" stroke="#38BDF8" stroke-width="1.25"/>
+  <line x1="60" y1="32" x2="80" y2="32" stroke="#38BDF8" stroke-width="1" stroke-dasharray="2 2" opacity="0.6"/>
+  <!-- Target bar 3 (Medical) -->
+  <rect x="82" y="62" width="12" height="26" rx="2" fill="#17233A" stroke="#38BDF8" stroke-width="1.25"/>
+  <line x1="78" y1="56" x2="98" y2="56" stroke="#38BDF8" stroke-width="1" stroke-dasharray="2 2" opacity="0.6"/>
+  <!-- Target bar 4 (Shelter) -->
+  <rect x="100" y="44" width="12" height="44" rx="2" fill="#17233A" stroke="#38BDF8" stroke-width="1.25"/>
+  <line x1="96" y1="38" x2="116" y2="38" stroke="#38BDF8" stroke-width="1" stroke-dasharray="2 2" opacity="0.6"/>
+</svg>
