@@ -1,199 +1,209 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
-  MapPin,
-  AlertTriangle,
-  Boxes,
-  HeartHandshake,
-  RefreshCw,
-  Sparkles,
-  AlertCircle,
-  ShieldCheck,
+  Search,
+  Bell,
+  Sun,
+  Moon,
+  Shield,
   LogOut,
+  ChevronDown,
+  UserCheck,
 } from "lucide-react";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 
 export const Navbar: React.FC = () => {
-  const location = useLocation();
-  const queryClient = useQueryClient();
-  const { user, isAdmin, logout, quickSwitchDemo } = useAuth();
+  const navigate = useNavigate();
+  const { user, logout, quickSwitchDemo } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const { isSuccess } = useQuery({
     queryKey: ["health"],
     queryFn: api.getHealth,
-    refetchInterval: 10000,
+    refetchInterval: 15000,
   });
 
-  const triggerMutation = useMutation({
-    mutationFn: () => api.triggerIngestion(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["events"] });
-      queryClient.invalidateQueries({ queryKey: ["grid-cells"] });
-      queryClient.invalidateQueries({ queryKey: ["ingestion-status"] });
-    },
-  });
-
-  const navLinks = [
-    { to: "/", label: "Disaster Map", icon: MapPin },
-    { to: "/events", label: "Events", icon: AlertTriangle },
-    { to: "/predictions", label: "Resource Demand", icon: Sparkles },
-    { to: "/inventory", label: "Inventory", icon: Boxes },
-    { to: "/donors", label: "Donors", icon: HeartHandshake },
-    { to: "/report", label: "Report Incident", icon: AlertCircle },
-    { to: "/admin", label: "Admin Review", icon: ShieldCheck },
-  ];
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    navigate(`/events?search=${encodeURIComponent(searchQuery.trim())}`);
+  };
 
   return (
-    <header className="bg-qc-sidebar/95 backdrop-blur-md border-b border-qc-border-subtle sticky top-0 z-50 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Brand */}
-        <Link to="/" className="flex items-center space-x-3 group shrink-0">
-          <div className="w-9 h-9 rounded-lg bg-qc-surface-2 border border-qc-border-strong flex items-center justify-center p-1.5 shadow-md shadow-sky-950/20 group-hover:border-qc-accent/60 transition-colors">
-            <img src="/src/assets/brand/mark.svg" alt="" aria-hidden="true" className="w-full h-full" />
+    <header className="sticky top-0 z-50 glass-panel border-b border-border-subtle transition-colors shadow-sm">
+      <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        {/* Left: Platform Brand */}
+        <Link to="/" className="flex items-center space-x-3 group shrink-0 select-none">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center p-2 shadow-lg shadow-sky-500/25 group-hover:scale-105 transition-transform text-white">
+            <Shield className="w-full h-full stroke-[2.25]" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-semibold text-qc-text-primary text-sm tracking-tight">
+              <span className="font-bold text-sm tracking-tight text-text-primary">
                 Emergency Response Platform
               </span>
-              <span className="text-[10px] bg-qc-surface-2 text-qc-text-secondary px-1.5 py-0.5 rounded border border-qc-border-subtle font-mono uppercase">
-                W1–4
+              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-full bg-sky-500/15 text-sky-500 dark:text-sky-400 border border-sky-500/20">
+                v1.4
               </span>
             </div>
-            <p className="text-[11px] text-qc-text-tertiary">
-              Impact Assessment & Resource Intelligence
+            <p className="text-[11px] text-text-tertiary hidden sm:block">
+              Impact Assessment &amp; Resource Intelligence
             </p>
           </div>
         </Link>
 
-        {/* Navigation Links */}
-        <nav className="hidden lg:flex items-center space-x-1">
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            const isActive = location.pathname === link.to;
-            return (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`flex items-center space-x-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  isActive
-                    ? "bg-qc-surface-2 text-qc-text-primary border border-qc-border-strong shadow-sm"
-                    : "text-qc-text-secondary hover:text-qc-text-primary hover:bg-qc-surface-1"
-                }`}
-              >
-                <Icon
-                  className={`h-3.5 w-3.5 ${
-                    isActive ? "text-qc-accent" : "text-qc-text-tertiary"
-                  }`}
-                />
-                <span>{link.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Right Section: Sync, Demo Auth, Connectivity */}
-        <div className="flex items-center space-x-2.5 shrink-0">
-          {/* Feed Sync Trigger */}
-          <button
-            onClick={() => triggerMutation.mutate()}
-            disabled={triggerMutation.isPending}
-            className="flex items-center space-x-1.5 bg-qc-surface-1 hover:bg-qc-surface-2 text-qc-text-secondary hover:text-qc-text-primary border border-qc-border-subtle hover:border-qc-border-strong px-2.5 py-1.5 rounded-md text-xs font-medium transition shadow-sm disabled:opacity-50"
-            title="Poll GDACS, USGS, NDMA and satellite feeds now"
-          >
-            <RefreshCw
-              className={`h-3.5 w-3.5 ${
-                triggerMutation.isPending ? "animate-spin text-amber-400" : "text-qc-text-tertiary"
-              }`}
+        {/* Center: Search Bar with Ctrl K shortcut hint */}
+        <form
+          onSubmit={handleSearchSubmit}
+          className="hidden md:flex flex-1 max-w-xl mx-4 relative items-center"
+        >
+          <div className="relative w-full">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search locations, incidents, report IDs..."
+              className="w-full pl-9 pr-16 py-1.5 rounded-xl glass-card text-xs text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-all"
             />
-            <span className="hidden sm:inline">
-              {triggerMutation.isPending ? "Syncing..." : "Sync Feeds"}
-            </span>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-1 pointer-events-none">
+              <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-3 text-text-tertiary border border-border-subtle shadow-sm">
+                Ctrl
+              </kbd>
+              <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-3 text-text-tertiary border border-border-subtle shadow-sm">
+                K
+              </kbd>
+            </div>
+          </div>
+        </form>
+
+        {/* Right Controls: Notifications, Theme Switcher, System Online, User Profile */}
+        <div className="flex items-center space-x-3 shrink-0">
+          {/* Notifications Bell */}
+          <button
+            type="button"
+            className="relative p-2 rounded-xl glass-card hover:bg-surface-3 text-text-secondary hover:text-text-primary transition"
+            title="Notifications (3 active alerts)"
+          >
+            <Bell className="w-4 h-4" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-surface-1 animate-pulse" />
           </button>
 
-          {/* Auth Switcher */}
-          {user ? (
-            <div className="flex items-center space-x-2 bg-qc-surface-1 border border-qc-border-subtle rounded-md px-2.5 py-1 text-xs">
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  isAdmin ? "bg-emerald-400" : "bg-sky-400"
-                }`}
-              />
-              <span className="text-qc-text-primary font-medium truncate max-w-[100px]">
-                {user.full_name.split(" ")[0]}
-              </span>
-              <span className="font-mono text-[10px] uppercase bg-qc-surface-2 text-qc-text-tertiary px-1.5 py-0.5 rounded border border-qc-border-subtle">
-                {user.role}
-              </span>
-              <button
-                onClick={logout}
-                title="Sign out"
-                className="text-qc-text-tertiary hover:text-red-400 ml-0.5 transition-colors"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center space-x-1.5">
-              <button
-                onClick={() => quickSwitchDemo("reporter")}
-                className="px-2 py-1 bg-qc-surface-1 hover:bg-qc-surface-2 text-qc-text-secondary hover:text-qc-text-primary border border-qc-border-subtle rounded text-xs transition"
-                title="Sign in as Field Reporter (Demo)"
-              >
-                Reporter
-              </button>
-              <button
-                onClick={() => quickSwitchDemo("admin")}
-                className="px-2 py-1 bg-qc-surface-2 hover:bg-qc-surface-3 text-qc-accent border border-qc-border-strong rounded text-xs font-medium transition"
-                title="Sign in as Relief Admin (Demo)"
-              >
-                Admin
-              </button>
-            </div>
-          )}
+          {/* Theme Toggle (Sun / Moon) */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="p-2 rounded-xl glass-card hover:bg-surface-3 text-text-secondary hover:text-text-primary transition group"
+            title={theme === "dark" ? "Switch to Light Glassmorphic Theme" : "Switch to Dark Glassmorphic Theme"}
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? (
+              <Sun className="w-4 h-4 text-amber-400 group-hover:rotate-45 transition-transform" />
+            ) : (
+              <Moon className="w-4 h-4 text-sky-600 group-hover:-rotate-12 transition-transform" />
+            )}
+          </button>
 
-          {/* Backend Connection Indicator */}
+          {/* System Online Badge */}
           <div
-            className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono border ${
+            className={`hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-medium glass-card border ${
               isSuccess
-                ? "bg-emerald-950/60 border-emerald-800/80 text-emerald-400"
-                : "bg-red-950/60 border-red-800/80 text-red-400"
+                ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                : "border-red-500/30 text-red-600 dark:text-red-400"
             }`}
           >
             <span
-              className={`h-1.5 w-1.5 rounded-full ${
-                isSuccess ? "bg-emerald-400 animate-pulse" : "bg-red-400"
+              className={`h-2 w-2 rounded-full ${
+                isSuccess ? "bg-emerald-500 animate-pulse" : "bg-red-500"
               }`}
             />
-            <span className="hidden sm:inline">
-              {isSuccess ? "Online" : "Offline"}
+            <span className="text-[11px] font-mono">
+              {isSuccess ? "System Online" : "System Offline"}
             </span>
           </div>
-        </div>
-      </div>
 
-      {/* Mobile Nav strip for screens < 1024px */}
-      <div className="lg:hidden flex items-center overflow-x-auto px-4 py-1.5 border-t border-qc-border-subtle bg-qc-bg space-x-1">
-        {navLinks.map((link) => {
-          const Icon = link.icon;
-          const isActive = location.pathname === link.to;
-          return (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded text-xs whitespace-nowrap ${
-                isActive
-                  ? "bg-qc-surface-2 text-qc-text-primary border border-qc-border-strong font-medium"
-                  : "text-qc-text-secondary hover:text-qc-text-primary"
-              }`}
+          {/* User Profile Pill */}
+          <div className="relative">
+            <button
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className="flex items-center space-x-2 pl-1 pr-2.5 py-1 rounded-xl glass-card hover:bg-surface-3 transition"
             >
-              <Icon className="h-3 w-3" />
-              <span>{link.label}</span>
-            </Link>
-          );
-        })}
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                {user ? user.full_name.charAt(0).toUpperCase() : "A"}
+              </div>
+              <div className="text-left hidden lg:block">
+                <div className="text-xs font-semibold text-text-primary leading-tight">
+                  {user ? user.full_name.split(" ")[0] : "Admin"}
+                </div>
+                <div className="text-[10px] text-text-tertiary capitalize">
+                  {user ? user.role : "Administrator"}
+                </div>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 text-text-tertiary hidden sm:block" />
+            </button>
+
+            {/* Dropdown Menu */}
+            {isUserMenuOpen && (
+              <div
+                className="absolute right-0 mt-2 w-56 rounded-xl glass-panel shadow-2xl p-2 z-50 text-xs space-y-1 animate-fade-in"
+                onMouseLeave={() => setIsUserMenuOpen(false)}
+              >
+                <div className="px-2.5 py-2 border-b border-border-subtle">
+                  <p className="font-semibold text-text-primary">
+                    {user ? user.full_name : "Operational Admin"}
+                  </p>
+                  <p className="text-[11px] text-text-tertiary truncate">
+                    {user ? user.email : "admin@emergency.gov"}
+                  </p>
+                  <span className="inline-block mt-1 font-mono text-[10px] px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-500 dark:text-sky-400 font-semibold uppercase">
+                    Role: {user ? user.role : "Admin (Full Access)"}
+                  </span>
+                </div>
+
+                <div className="pt-1 space-y-1">
+                  <button
+                    onClick={() => {
+                      quickSwitchDemo("admin");
+                      setIsUserMenuOpen(false);
+                    }}
+                    className="w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-lg hover:bg-surface-3 text-text-secondary hover:text-text-primary transition"
+                  >
+                    <UserCheck className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Switch to Relief Admin (Demo)</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      quickSwitchDemo("reporter");
+                      setIsUserMenuOpen(false);
+                    }}
+                    className="w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-lg hover:bg-surface-3 text-text-secondary hover:text-text-primary transition"
+                  >
+                    <UserCheck className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Switch to Field Reporter (Demo)</span>
+                  </button>
+                </div>
+
+                <div className="pt-1 border-t border-border-subtle">
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsUserMenuOpen(false);
+                    }}
+                    className="w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-lg hover:bg-red-500/15 text-red-500 dark:text-red-400 transition"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </header>
   );

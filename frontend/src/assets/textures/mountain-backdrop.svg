@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- Sky Gradient -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a365d"/>
+      <stop offset="40%" stop-color="#2b6cb0"/>
+      <stop offset="70%" stop-color="#4299e1"/>
+      <stop offset="100%" stop-color="#90cdf4"/>
+    </linearGradient>
+
+    <!-- Mountain Ridge Far -->
+    <linearGradient id="ridgeFar" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4a5568" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#2d3748" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <!-- Mountain Ridge Mid -->
+    <linearGradient id="ridgeMid" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d3748"/>
+      <stop offset="100%" stop-color="#1a202c"/>
+    </linearGradient>
+
+    <!-- Mountain Ridge Close -->
+    <linearGradient id="ridgeClose" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a202c"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <!-- Mist and Atmosphere Gradient -->
+    <linearGradient id="mistGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#cbd5e1" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#94a3b8" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <linearGradient id="sunGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbd38d" stop-opacity="0.4"/>
+      <stop offset="50%" stop-color="#ed8936" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#dd6b20" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Forest & Terrain Foothills -->
+    <linearGradient id="foothills" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#134e4a"/>
+      <stop offset="60%" stop-color="#064e3b"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1920" height="1080" fill="url(#skyGrad)"/>
+
+  <!-- Morning/Evening Ambient Sun Rim -->
+  <circle cx="1450" cy="320" r="480" fill="url(#sunGlow)"/>
+
+  <!-- Distant Snow Peaks -->
+  <path d="M0,520 L180,420 L280,480 L440,360 L580,450 L750,310 L920,440 L1100,330 L1260,420 L1420,290 L1580,400 L1740,340 L1920,430 L1920,1080 L0,1080 Z" fill="#718096" opacity="0.45"/>
+  <path d="M750,310 L820,370 L790,440 L710,380 Z" fill="#e2e8f0" opacity="0.6"/>
+  <path d="M1100,330 L1170,390 L1140,430 L1070,390 Z" fill="#e2e8f0" opacity="0.65"/>
+  <path d="M1420,290 L1490,360 L1460,420 L1380,360 Z" fill="#edf2f7" opacity="0.7"/>
+
+  <!-- Far Mountain Range -->
+  <path d="M0,600 L160,520 L340,620 L520,480 L690,570 L860,460 L1040,560 L1220,450 L1390,540 L1580,440 L1760,530 L1920,490 L1920,1080 L0,1080 Z" fill="url(#ridgeFar)"/>
+
+  <!-- Atmospheric Mid Mist -->
+  <rect y="480" width="1920" height="240" fill="url(#mistGrad)"/>
+
+  <!-- Middle Rugged Ridges -->
+  <path d="M0,690 L220,590 L420,680 L610,560 L820,670 L1010,540 L1240,660 L1460,550 L1680,650 L1920,570 L1920,1080 L0,1080 Z" fill="url(#ridgeMid)"/>
+
+  <!-- Near Ridge & Tree Silhouette Layer -->
+  <path d="M0,780 L180,710 L380,810 L590,690 L790,780 L990,680 L1190,790 L1410,690 L1620,780 L1840,710 L1920,740 L1920,1080 L0,1080 Z" fill="url(#ridgeClose)"/>
+
+  <!-- Valley & Foothill Evergreen Foreground -->
+  <path d="M0,890 C320,860 640,920 960,880 C1280,840 1600,900 1920,870 L1920,1080 L0,1080 Z" fill="url(#foothills)" opacity="0.95"/>
+  <rect y="840" width="1920" height="240" fill="#020617" opacity="0.5"/>
+</svg>
+

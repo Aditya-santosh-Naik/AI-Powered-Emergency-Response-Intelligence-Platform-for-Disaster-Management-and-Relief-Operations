@@ -2,15 +2,18 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Navbar } from "./components/Navbar";
+import { Sidebar } from "./components/Sidebar";
+import { OperationalTicker } from "./components/OperationalTicker";
 import { MapPage } from "./pages/MapPage";
 import { EventsPage } from "./pages/EventsPage";
 import { InventoryPage } from "./pages/InventoryPage";
 import { DonorsPage } from "./pages/DonorsPage";
 import { PredictionsPage } from "./pages/PredictionsPage";
-
-import { AuthProvider } from "./context/AuthContext";
 import { ReportDisasterPage } from "./pages/ReportDisasterPage";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage";
+
+import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,25 +28,45 @@ const queryClient = new QueryClient({
 export const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
-          <div className="min-h-screen bg-qc-bg text-qc-text-primary flex flex-col font-sans selection:bg-qc-accent/20 selection:text-qc-accent overflow-x-hidden">
-            <Navbar />
-            <main className="flex-1 flex flex-col">
-              <Routes>
-                <Route path="/" element={<MapPage />} />
-                <Route path="/events" element={<EventsPage />} />
-                <Route path="/predictions" element={<PredictionsPage />} />
-                <Route path="/inventory" element={<InventoryPage />} />
-                <Route path="/donors" element={<DonorsPage />} />
-                <Route path="/report" element={<ReportDisasterPage />} />
-                <Route path="/admin" element={<AdminDashboardPage />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </main>
-          </div>
-        </BrowserRouter>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            {/* Atmospheric Panoramic Mountain Backdrop */}
+            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+              <img
+                src="/src/assets/textures/mountain-backdrop.svg"
+                alt=""
+                aria-hidden="true"
+                className="w-full h-full object-cover opacity-60 dark:opacity-35 transition-opacity duration-300 scale-105"
+              />
+              <div className="absolute inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-[2px] transition-colors duration-300" />
+            </div>
+
+            {/* Platform Application Shell */}
+            <div className="relative z-10 min-h-screen flex flex-col font-sans overflow-x-hidden selection:bg-sky-500/25 selection:text-sky-400">
+              <Navbar />
+
+              <div className="flex-1 flex overflow-hidden">
+                <Sidebar />
+                <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+                  <Routes>
+                    <Route path="/" element={<MapPage />} />
+                    <Route path="/events" element={<EventsPage />} />
+                    <Route path="/predictions" element={<PredictionsPage />} />
+                    <Route path="/inventory" element={<InventoryPage />} />
+                    <Route path="/donors" element={<DonorsPage />} />
+                    <Route path="/report" element={<ReportDisasterPage />} />
+                    <Route path="/admin" element={<AdminDashboardPage />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </main>
+              </div>
+
+              <OperationalTicker />
+            </div>
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 };

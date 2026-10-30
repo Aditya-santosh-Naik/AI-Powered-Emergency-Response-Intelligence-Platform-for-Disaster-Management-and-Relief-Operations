@@ -24,39 +24,39 @@ export const KpiTile: React.FC<KpiTileProps> = ({
   className = "",
 }) => {
   const toneStyles = {
-    default: "border-qc-border-subtle hover:border-qc-border-strong",
-    accent: "border-sky-800/70 bg-gradient-to-br from-qc-surface-1 to-sky-950/20",
-    critical: "border-red-800/70 bg-gradient-to-br from-qc-surface-1 to-red-950/20",
-    warning: "border-amber-800/70 bg-gradient-to-br from-qc-surface-1 to-amber-950/20",
-    success: "border-emerald-800/70 bg-gradient-to-br from-qc-surface-1 to-emerald-950/20",
+    default: "border-border-subtle hover:border-border-strong",
+    accent: "border-sky-500/30 bg-sky-500/10 shadow-sm",
+    critical: "border-red-500/30 bg-red-500/10 shadow-sm",
+    warning: "border-amber-500/30 bg-amber-500/10 shadow-sm",
+    success: "border-emerald-500/30 bg-emerald-500/10 shadow-sm",
   }[tone];
 
   const valueDisplay = value === null || value === undefined ? "—" : value;
 
   return (
     <div
-      className={`bg-qc-surface-1 border rounded-lg p-4 transition-all duration-150 ${toneStyles} ${className}`}
+      className={`glass-panel border rounded-2xl p-4 transition-all duration-200 ${toneStyles} ${className}`}
     >
       <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="text-xs font-medium text-qc-text-secondary tracking-wide uppercase">
+        <span className="text-xs font-semibold text-text-secondary tracking-wide uppercase">
           {label}
         </span>
-        {Icon && <Icon className="w-4 h-4 text-qc-text-tertiary shrink-0" />}
+        {Icon && <Icon className="w-4 h-4 text-text-tertiary shrink-0" />}
       </div>
 
       <div className="flex items-baseline gap-1.5">
-        <span className="text-2xl font-bold font-sans tracking-tight text-qc-text-primary tabular-nums">
+        <span className="text-2xl font-bold font-sans tracking-tight text-text-primary tabular-nums">
           {valueDisplay}
         </span>
         {unit && (
-          <span className="text-xs font-mono text-qc-text-tertiary">
+          <span className="text-xs font-mono text-text-tertiary">
             {unit}
           </span>
         )}
       </div>
 
       {(subtext || source || freshness) && (
-        <div className="mt-2.5 pt-2 border-t border-qc-border-subtle/60 flex items-center justify-between text-[11px] text-qc-text-tertiary">
+        <div className="mt-2.5 pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] text-text-tertiary">
           <span>{subtext || (source ? `Src: ${source}` : "")}</span>
           {freshness && <span className="font-mono text-[10px]">{freshness}</span>}
         </div>
