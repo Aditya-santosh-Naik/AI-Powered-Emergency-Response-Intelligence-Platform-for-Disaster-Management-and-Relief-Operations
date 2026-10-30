@@ -1,0 +1,16 @@
+column,type_or_unit,meaning,quality_and_usage_note
+disaster_type,Categorical,"Flood, earthquake, cyclone, landslide, wildfire",Synthetic demo feature; replace/validate against source
+affected_population_estimate,Integer people,Estimated people in zone,Use current geospatial/population pipeline; store provenance
+severity_score_0_1,Float 0–1,Initial severity score,Derived value; document formula and version
+population_density_per_km2,People/km²,Population density,Must be sourced and spatially aligned
+children_share_0_1,Fraction 0–1,Children share,Use valid age-disaggregated population data
+elderly_share_0_1,Fraction 0–1,Elderly share,Use valid age-disaggregated population data
+medical_dependency_share_0_1,Fraction 0–1,Medical dependency share,Prefer field/official data; never infer individual health status
+building_damage_share_0_1,Fraction 0–1,Estimated building damage share,Must identify as estimated unless observed
+road_accessibility_0_1,Fraction 0–1,Road accessibility score,Derived from routing/road conditions; stale data caveat
+response_delay_hours,Hours,Estimated time before support arrives,Scenario input or measured operational value
+planning_horizon_days,Days,Planning duration,Scenario input
+target_food_packets_required,Food packets,Food demand label,Synthetic target in demo file; real labels needed for operational training
+target_water_liters_required,Litres,Water demand label,Synthetic target in demo file; real labels needed for operational training
+target_medical_kits_required,Kits,Medical demand label,Synthetic target in demo file; real labels needed for operational training
+target_shelter_spaces_required,People/places,Shelter capacity demand label,Synthetic target in demo file; real labels needed for operational training

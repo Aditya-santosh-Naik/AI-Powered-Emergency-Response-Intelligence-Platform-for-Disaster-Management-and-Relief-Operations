@@ -11,15 +11,28 @@ import type {
   Donor,
   DonorDetail,
   Donation,
+  ZonePrediction,
+  ModelStatus,
+  ScenarioComparison,
+  SingleZonePredictionPayload,
+  User,
+  TokenOut,
+  DisasterReport,
+  DisasterReportCreate,
+  DisasterReportReviewRequest,
+  DisasterReportAssessmentResponse,
 } from "../types";
+
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api/v1";
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
-  const headers = {
+  const token = localStorage.getItem("emergency_token");
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(options.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...((options.headers as Record<string, string>) || {}),
   };
 
   const response = await fetch(url, { ...options, headers });
@@ -110,4 +123,107 @@ export const api = {
     const queryStr = q.toString() ? `?${q.toString()}` : "";
     return request<Donation[]>(`/donations${queryStr}`);
   },
+
+  // Weeks 3-4 Resource Demand Predictions
+  getModelStatus: () => request<ModelStatus>("/predictions/status"),
+  getEventPredictions: (eventId: string) =>
+    request<ZonePrediction[]>(`/predictions/events/${eventId}`),
+  predictEventResources: (eventId: string, horizonDays: number = 3, vulnBuffer: boolean = false) =>
+    request<ZonePrediction[]>(
+      `/predictions/events/${eventId}/predict?planning_horizon_days=${horizonDays}&apply_vulnerability_buffer=${vulnBuffer}`,
+      { method: "POST" }
+    ),
+  predictSingleZone: (data: SingleZonePredictionPayload) =>
+    request<ZonePrediction>("/predictions/predict-zone", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  simulateScenario: (data: {
+    zone_data?: any;
+    scenario_name?: string;
+    population_multiplier?: number;
+    severity_score_delta?: number;
+    planning_horizon_days?: number;
+    response_delay_hours_delta?: number;
+    road_accessibility_delta?: number;
+    inventory_availability_multiplier?: number;
+    apply_vulnerability_buffer?: boolean;
+  }) =>
+    request<ScenarioComparison>("/predictions/scenarios", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  recalculateEventDemand: (
+    eventId: string,
+    data: { trigger_type: string; source_reference: string; notes?: string; field_updates?: any }
+  ) =>
+    request<{
+      status: string;
+      history_id: string;
+      event_id: string;
+      trigger_type: string;
+      trigger_source: string;
+      zones_updated_count: number;
+      updated_at: string;
+      predictions: ZonePrediction[];
+    }>(`/predictions/events/${eventId}/recalculate`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  refreshExcelWorkbook: () =>
+    request<{ status: string; path: string; size_bytes: number; timestamp: string }>(
+      "/predictions/excel/refresh",
+      { method: "POST" }
+    ),
+  getExcelDownloadUrl: () => `${API_BASE}/predictions/excel/download`,
+
+  // Authentication (Role A & B)
+  login: (data: { email: string; password: string }) =>
+    request<TokenOut>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  register: (data: {
+    email: string;
+    password: string;
+    full_name: string;
+    role?: string;
+    organization?: string;
+    phone?: string;
+  }) =>
+    request<TokenOut>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  getMe: () => request<User>("/auth/me"),
+
+  // Disaster Reporting (Role A: Disaster Reporter)
+  submitReport: (data: DisasterReportCreate) =>
+    request<DisasterReport>("/reports", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  getMyReports: () => request<DisasterReport[]>("/reports/my"),
+  getReportDetail: (id: string) => request<DisasterReport>(`/reports/${id}`),
+
+  // Admin Report Review & Assessment (Role B: Relief Coordinator)
+  getAdminReports: (params?: { status?: string; disaster_type?: string; limit?: number }) => {
+    const q = new URLSearchParams();
+    if (params?.status) q.set("status", params.status);
+    if (params?.disaster_type) q.set("disaster_type", params.disaster_type);
+    if (params?.limit) q.set("limit", params.limit.toString());
+    const queryStr = q.toString() ? `?${q.toString()}` : "";
+    return request<DisasterReport[]>(`/reports${queryStr}`);
+  },
+  reviewReport: (id: string, data: DisasterReportReviewRequest) =>
+    request<DisasterReport>(`/reports/${id}/review`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  assessReportAndPredict: (id: string, horizonDays: number = 3, vulnBuffer: boolean = false) =>
+    request<DisasterReportAssessmentResponse>(
+      `/reports/${id}/assess-and-predict?planning_horizon_days=${horizonDays}&apply_vulnerability_buffer=${vulnBuffer}`,
+      { method: "POST" }
+    ),
 };
+

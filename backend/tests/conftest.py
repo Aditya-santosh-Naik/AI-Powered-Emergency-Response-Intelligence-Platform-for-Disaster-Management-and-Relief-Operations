@@ -6,8 +6,10 @@ import sys
 import pytest
 from starlette.testclient import TestClient
 
-# Ensure backend root is on sys.path
+# Ensure backend root and workspace root are on sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
 
 from app.main import app
 

@@ -199,3 +199,112 @@ class Donation(Base):
     __table_args__ = (
         CheckConstraint("quantity > 0", name="ck_donation_quantity_positive"),
     )
+
+
+class ResourcePrediction(Base):
+    __tablename__ = "resource_prediction"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    event_id = Column(UUID(as_uuid=True), ForeignKey("disaster_event.id", ondelete="CASCADE"), nullable=False)
+    impact_zone_id = Column(UUID(as_uuid=True), ForeignKey("impact_zone.id", ondelete="SET NULL"), nullable=True)
+    grid_cell_id = Column(UUID(as_uuid=True), ForeignKey("grid_cell.id", ondelete="SET NULL"), nullable=True)
+    zone_identifier = Column(String(100), nullable=False)
+    disaster_type = Column(String(50), nullable=False)
+    severity_score = Column(Float, nullable=False)
+    affected_population = Column(Integer, nullable=False)
+    planning_horizon_days = Column(Integer, nullable=False, default=3)
+    road_accessibility = Column(Float, nullable=False, default=0.8)
+    building_damage_share = Column(Float, nullable=False, default=0.2)
+    food_packets_predicted = Column(Integer, nullable=False)
+    food_packets_lower = Column(Integer, nullable=True)
+    food_packets_upper = Column(Integer, nullable=True)
+    water_liters_predicted = Column(Integer, nullable=False)
+    water_liters_lower = Column(Integer, nullable=True)
+    water_liters_upper = Column(Integer, nullable=True)
+    medical_kits_predicted = Column(Integer, nullable=False)
+    medical_kits_lower = Column(Integer, nullable=True)
+    medical_kits_upper = Column(Integer, nullable=True)
+    shelter_spaces_predicted = Column(Integer, nullable=False)
+    shelter_spaces_lower = Column(Integer, nullable=True)
+    shelter_spaces_upper = Column(Integer, nullable=True)
+    urgency_score = Column(Float, nullable=False, default=50.0)
+    urgency_class = Column(String(50), nullable=False, default="MODERATE")
+    urgency_reasons = Column(JSONB, nullable=True)
+    vulnerability_profile = Column(JSONB, nullable=True)
+    model_version = Column(String(50), nullable=False)
+    data_status = Column(String(50), nullable=False)
+    is_reviewed = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
+class PredictionHistory(Base):
+    __tablename__ = "prediction_history"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    event_id = Column(UUID(as_uuid=True), ForeignKey("disaster_event.id", ondelete="CASCADE"), nullable=False)
+    trigger_type = Column(String(50), nullable=False)
+    trigger_source = Column(String(255), nullable=False)
+    notes = Column(Text, nullable=True)
+    zones_updated_count = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class User(Base):
+    __tablename__ = "app_user"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    hashed_password = Column(String(255), nullable=False)
+    full_name = Column(String(255), nullable=False)
+    role = Column(String(50), nullable=False, default="reporter")  # "reporter" or "admin"
+    is_active = Column(Boolean, nullable=False, default=True)
+    organization = Column(String(255), nullable=True)
+    phone = Column(String(50), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    reports_submitted = relationship("DisasterReport", back_populates="reporter", foreign_keys="DisasterReport.reporter_id")
+
+
+class DisasterReport(Base):
+    __tablename__ = "disaster_report"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    report_code = Column(String(50), unique=True, nullable=False, index=True)
+    reporter_id = Column(UUID(as_uuid=True), ForeignKey("app_user.id", ondelete="CASCADE"), nullable=False)
+    disaster_type = Column(String(50), nullable=False, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+    location_name = Column(String(255), nullable=False)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    location = Column(Geometry("POINT", srid=4326), nullable=True)
+    occurred_at = Column(DateTime(timezone=True), nullable=False)
+    estimated_affected_population = Column(Integer, nullable=True)
+    estimated_damage_severity = Column(Float, nullable=True)
+    road_accessible = Column(Boolean, nullable=False, default=True)
+    supporting_evidence_url = Column(Text, nullable=True)
+
+    # Review workflow fields
+    status = Column(String(50), nullable=False, default="PENDING_REVIEW", index=True)
+    admin_notes = Column(Text, nullable=True)
+    reviewed_by_id = Column(UUID(as_uuid=True), ForeignKey("app_user.id", ondelete="SET NULL"), nullable=True)
+    reviewed_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Linked confirmed event
+    associated_event_id = Column(UUID(as_uuid=True), ForeignKey("disaster_event.id", ondelete="SET NULL"), nullable=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    reporter = relationship("User", back_populates="reports_submitted", foreign_keys=[reporter_id])
+    reviewer = relationship("User", foreign_keys=[reviewed_by_id])
+    associated_event = relationship("DisasterEvent")
+
+    __table_args__ = (
+        CheckConstraint("latitude >= -90.0 AND latitude <= 90.0", name="ck_report_latitude"),
+        CheckConstraint("longitude >= -180.0 AND longitude <= 180.0", name="ck_report_longitude"),
+    )
+
+

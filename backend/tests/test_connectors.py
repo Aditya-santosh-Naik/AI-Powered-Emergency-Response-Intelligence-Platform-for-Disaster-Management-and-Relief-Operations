@@ -21,14 +21,14 @@ async def test_usgs_connector_fetch_and_normalize():
                 "id": "us7000test",
                 "properties": {
                     "mag": 6.2,
-                    "place": "15 km SSW of Hualien City, Taiwan",
+                    "place": "28 km NE of Tezpur, India",
                     "time": 1712102400000,
                     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000test",
                     "alert": "orange",
                 },
                 "geometry": {
                     "type": "Point",
-                    "coordinates": [121.56, 23.85, 15.0],
+                    "coordinates": [92.8, 26.6, 15.0],
                 },
             }
         ],
@@ -47,7 +47,7 @@ async def test_usgs_connector_fetch_and_normalize():
     assert normalized["depth_km"] == 15.0
     assert normalized["alert_level"] == "orange"
     assert normalized["is_sample"] is False
-    assert "POINT (121.56 23.85)" in normalized["geometry"]
+    assert "POINT (92.8 26.6)" in normalized["geometry"]
 
 
 @pytest.mark.asyncio

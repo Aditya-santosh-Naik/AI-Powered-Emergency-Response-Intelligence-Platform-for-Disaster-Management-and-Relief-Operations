@@ -26,8 +26,22 @@ class USGSConnector(BaseConnector):
             data = resp.json()
 
         features = data.get("features", [])
-        logger.info("USGS returned %d earthquakes", len(features))
-        return features
+        # Restrict strictly to India & immediate border/coastal zones (lat: 6 to 38, lon: 65 to 98.5)
+        india_features = []
+        for f in features:
+            props = f.get("properties", {})
+            place = (props.get("place") or "").lower()
+            coords = f.get("geometry", {}).get("coordinates", [])
+            if "india" in place:
+                india_features.append(f)
+                continue
+            if coords and len(coords) >= 2:
+                lon, lat = coords[0], coords[1]
+                if 6.0 <= lat <= 38.0 and 65.0 <= lon <= 98.5:
+                    india_features.append(f)
+
+        logger.info("USGS returned %d earthquakes (%d in India)", len(features), len(india_features))
+        return india_features
 
     def normalize(self, raw: dict) -> dict:
         props = raw.get("properties", {})

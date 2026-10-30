@@ -1,0 +1,8 @@
+{
+  "package_name": "Disaster Resource Demand Dataset \u2014 Mentor Demo Package",
+  "created_date": "2026-10-27",
+  "synthetic_demo_rows": 2500,
+  "synthetic_demo_file": "data/synthetic_demo_training.csv",
+  "status": "starter_package; synthetic data clearly labelled",
+  "important": "Synthetic data is for pipeline demonstration only, not real-world accuracy claims."
+}

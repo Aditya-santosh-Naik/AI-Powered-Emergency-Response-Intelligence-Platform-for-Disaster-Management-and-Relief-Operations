@@ -40,6 +40,14 @@ def _to_wkb(val):
 @event.listens_for(engine.sync_engine, "connect")
 def _register_sqlite_spatial_functions(dbapi_conn, connection_record):
     """Provide lightweight Python fallbacks for SpatiaLite functions when running on SQLite."""
+    if hasattr(dbapi_conn, "cursor"):
+        try:
+            cursor = dbapi_conn.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA busy_timeout=30000")
+            cursor.close()
+        except Exception:
+            pass
     if hasattr(dbapi_conn, "create_function"):
         dbapi_conn.create_function("AsEWKB", 1, _to_wkb)
         dbapi_conn.create_function("AsBinary", 1, _to_wkb)

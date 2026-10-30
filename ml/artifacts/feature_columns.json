@@ -1,0 +1,20 @@
+[
+  "affected_population_estimate",
+  "severity_score_0_1",
+  "population_density_per_km2",
+  "children_share_0_1",
+  "elderly_share_0_1",
+  "medical_dependency_share_0_1",
+  "building_damage_share_0_1",
+  "road_accessibility_0_1",
+  "response_delay_hours",
+  "planning_horizon_days",
+  "disaster_type_flood",
+  "disaster_type_earthquake",
+  "disaster_type_cyclone",
+  "disaster_type_landslide",
+  "disaster_type_wildfire",
+  "region_type_urban",
+  "region_type_peri_urban",
+  "region_type_rural"
+]

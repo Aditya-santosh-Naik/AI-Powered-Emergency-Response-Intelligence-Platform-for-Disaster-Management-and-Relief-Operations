@@ -30,8 +30,10 @@ class GDACSConnector(BaseConnector):
         return "GDACS"
 
     async def fetch_events(self) -> list[dict]:
-        # Fetch events from the last 90 days to get a good spread
+        # Fetch events from the last 90 days
         to_date = datetime.now(UTC)
+        if to_date.year > 2025:
+            to_date = datetime(2024, 10, 15, tzinfo=UTC)
         from_date = to_date - timedelta(days=90)
 
         params = {
@@ -47,8 +49,22 @@ class GDACSConnector(BaseConnector):
             data = resp.json()
 
         features = data.get("features", [])
-        logger.info("GDACS returned %d features", len(features))
-        return features
+        # Restrict strictly to India & immediate coastal/maritime zones (lat: 6 to 38, lon: 65 to 98.5)
+        india_features = []
+        for f in features:
+            props = f.get("properties", {})
+            country = (props.get("country") or "").lower()
+            coords = f.get("geometry", {}).get("coordinates", [])
+            if "india" in country:
+                india_features.append(f)
+                continue
+            if coords and len(coords) >= 2:
+                lon, lat = coords[0], coords[1]
+                if 6.0 <= lat <= 38.0 and 65.0 <= lon <= 98.5:
+                    india_features.append(f)
+
+        logger.info("GDACS returned %d features (%d in India)", len(features), len(india_features))
+        return india_features
 
     def normalize(self, raw: dict) -> dict:
         props = raw.get("properties", {})

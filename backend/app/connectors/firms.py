@@ -31,9 +31,8 @@ class FIRMSConnector(BaseConnector):
 
         # Query global active fires or a broad bounding box for the last 1 day
         # Source options: VIIRS_SNPP_NRT, MODIS_NRT, VIIRS_NOAA20_NRT
-        # Format: /api/area/csv/[MAP_KEY]/[SOURCE]/[W,S,E,N]/[DAYS]
-        # Using South Asia bounding box (60, 5, 100, 38) as primary focus area for manageable response size
-        url = f"{FIRMS_BASE_URL}/{map_key.strip()}/VIIRS_SNPP_NRT/60,5,100,38/1"
+        # Using India bounding box (W: 68, S: 6, E: 98, N: 38)
+        url = f"{FIRMS_BASE_URL}/{map_key.strip()}/VIIRS_SNPP_NRT/68,6,98,38/1"
 
         async with httpx.AsyncClient(timeout=45.0) as client:
             resp = await client.get(url)

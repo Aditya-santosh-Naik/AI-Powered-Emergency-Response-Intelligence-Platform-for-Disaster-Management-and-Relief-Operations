@@ -16,14 +16,18 @@ from app.db import Base, async_session, engine
 from app.models import (
     Depot,
     DisasterEvent,
+    DisasterReport,
     Donation,
     Donor,
     FieldOperation,
     InventoryItem,
     ResourceType,
+    User,
 )
+from app.services.auth import hash_password
 from app.services.grid import generate_grid_cells_for_impact_zone
 from app.services.impact import assess_event_impact
+from app.services.prediction import predict_event_resource_needs
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,9 +36,11 @@ RESOURCE_TYPES = [
     {"name": "food_packets", "unit": "packets"},
     {"name": "water", "unit": "liters"},
     {"name": "medical_kits", "unit": "kits"},
+    {"name": "shelter_spaces", "unit": "spaces"},
     {"name": "rescue_vehicles", "unit": "vehicles"},
     {"name": "personnel", "unit": "persons"},
 ]
+
 
 DEPOTS = [
     {
@@ -47,6 +53,7 @@ DEPOTS = [
             "food_packets": 50000,
             "water": 120000,
             "medical_kits": 2500,
+            "shelter_spaces": 8000,
             "rescue_vehicles": 35,
             "personnel": 180,
         },
@@ -61,6 +68,7 @@ DEPOTS = [
             "food_packets": 25000,
             "water": 60000,
             "medical_kits": 1200,
+            "shelter_spaces": 4500,
             "rescue_vehicles": 22,
             "personnel": 95,
         },
@@ -75,6 +83,7 @@ DEPOTS = [
             "food_packets": 35000,
             "water": 85000,
             "medical_kits": 1800,
+            "shelter_spaces": 6000,
             "rescue_vehicles": 28,
             "personnel": 120,
         },
@@ -89,6 +98,7 @@ DEPOTS = [
             "food_packets": 20000,
             "water": 45000,
             "medical_kits": 950,
+            "shelter_spaces": 3500,
             "rescue_vehicles": 18,
             "personnel": 75,
         },
@@ -103,11 +113,13 @@ DEPOTS = [
             "food_packets": 40000,
             "water": 90000,
             "medical_kits": 2000,
+            "shelter_spaces": 7000,
             "rescue_vehicles": 30,
             "personnel": 140,
         },
     },
 ]
+
 
 SAMPLE_EVENTS = [
     {
@@ -345,8 +357,150 @@ async def seed_database() -> None:
                 )
                 session.add(op)
 
+        # Generate initial Resource Demand Predictions for seeded disaster events (Weeks 3-4)
+        logger.info("Generating initial resource demand predictions for seeded events...")
+        for ev_data in SAMPLE_EVENTS:
+            ev_check = await session.execute(
+                select(DisasterEvent).where(DisasterEvent.external_id == ev_data["external_id"])
+            )
+            ev_obj = ev_check.scalar_one_or_none()
+            if ev_obj:
+                try:
+                    await predict_event_resource_needs(session, ev_obj.id, persist=True)
+                except Exception as exc:
+                    logger.warning("Could not pre-generate predictions for event %s: %s", ev_obj.id, exc)
+
+        # 6. Seed Demo Users (Admin and Reporter)
+        users_seed = [
+            {
+                "email": "admin@emergency.gov",
+                "password": "Admin@1234",
+                "full_name": "Command Center Admin",
+                "role": "admin",
+                "organization": "National Disaster Management Authority (NDMA)",
+                "phone": "+91-11-26701700",
+            },
+            {
+                "email": "reporter@emergency.gov",
+                "password": "Reporter@1234",
+                "full_name": "Priya Sharma (Field Officer)",
+                "role": "reporter",
+                "organization": "Assam State Disaster Management Authority",
+                "phone": "+91-361-2237011",
+            },
+        ]
+        seeded_users = {}
+        for u_data in users_seed:
+            u_stmt = select(User).where(User.email == u_data["email"])
+            u_res = await session.execute(u_stmt)
+            user_obj = u_res.scalar_one_or_none()
+            if not user_obj:
+                user_obj = User(
+                    email=u_data["email"],
+                    hashed_password=hash_password(u_data["password"]),
+                    full_name=u_data["full_name"],
+                    role=u_data["role"],
+                    organization=u_data["organization"],
+                    phone=u_data["phone"],
+                    is_active=True,
+                )
+                session.add(user_obj)
+                await session.flush()
+            seeded_users[user_obj.role] = user_obj
+        logger.info("Demo accounts seeded: admin@emergency.gov and reporter@emergency.gov")
+
+        # 7. Seed Sample Citizen Disaster Reports (Role A & B lifecycle)
+        admin_user = seeded_users.get("admin")
+        reporter_user = seeded_users.get("reporter")
+        if reporter_user:
+            sample_reports = [
+                {
+                    "report_code": "REP-20241026-0001",
+                    "reporter_id": reporter_user.id,
+                    "disaster_type": "flood",
+                    "title": "Flash Flooding along Subansiri Tributary",
+                    "description": "River water breached embankment near North Lakhimpur. Approximately 4 villages inundated with water up to waist height.",
+                    "location_name": "North Lakhimpur, Assam",
+                    "latitude": 27.235,
+                    "longitude": 94.102,
+                    "occurred_at": datetime.now(UTC) - timedelta(hours=3),
+                    "estimated_affected_population": 12500,
+                    "estimated_damage_severity": 0.65,
+                    "road_accessible": False,
+                    "status": "PENDING_REVIEW",
+                    "admin_notes": None,
+                    "reviewed_by_id": None,
+                    "reviewed_at": None,
+                },
+                {
+                    "report_code": "REP-20241026-0002",
+                    "reporter_id": reporter_user.id,
+                    "disaster_type": "cyclone",
+                    "title": "Severe Storm Surge in Ganjam Coastal Belt",
+                    "description": "Gale force winds destroyed semi-pucca houses and caused seawater ingress. Power grid and communication lines down.",
+                    "location_name": "Gopalpur, Ganjam, Odisha",
+                    "latitude": 19.260,
+                    "longitude": 84.910,
+                    "occurred_at": datetime.now(UTC) - timedelta(hours=12),
+                    "estimated_affected_population": 18000,
+                    "estimated_damage_severity": 0.80,
+                    "road_accessible": True,
+                    "status": "ACCEPTED_FOR_ASSESSMENT",
+                    "admin_notes": "Confirmed by district collectorate. Accepted for immediate impact assessment and resource prediction.",
+                    "reviewed_by_id": admin_user.id if admin_user else None,
+                    "reviewed_at": datetime.now(UTC) - timedelta(hours=8),
+                },
+                {
+                    "report_code": "REP-20241026-0003",
+                    "reporter_id": reporter_user.id,
+                    "disaster_type": "landslide",
+                    "title": "Mudflow Blocking NH-10 near Teesta Bridge",
+                    "description": "Heavy rainfall triggered mudflow blocking transport artery. 40 stranded vehicles reported.",
+                    "location_name": "Kalimpong, West Bengal",
+                    "latitude": 27.060,
+                    "longitude": 88.470,
+                    "occurred_at": datetime.now(UTC) - timedelta(hours=20),
+                    "estimated_affected_population": 1200,
+                    "estimated_damage_severity": 0.45,
+                    "road_accessible": False,
+                    "status": "ADDITIONAL_INFO_REQUIRED",
+                    "admin_notes": "Please provide updated photo/evidence and exact clearance timeline from BRO.",
+                    "reviewed_by_id": admin_user.id if admin_user else None,
+                    "reviewed_at": datetime.now(UTC) - timedelta(hours=14),
+                },
+            ]
+
+            for sr in sample_reports:
+                sr_check = await session.execute(
+                    select(DisasterReport).where(DisasterReport.report_code == sr["report_code"])
+                )
+                if not sr_check.scalar_one_or_none():
+                    point_wkt = Point(sr["longitude"], sr["latitude"]).wkt
+                    rep_obj = DisasterReport(
+                        report_code=sr["report_code"],
+                        reporter_id=sr["reporter_id"],
+                        disaster_type=sr["disaster_type"],
+                        title=sr["title"],
+                        description=sr["description"],
+                        location_name=sr["location_name"],
+                        latitude=sr["latitude"],
+                        longitude=sr["longitude"],
+                        location=point_wkt,
+                        occurred_at=sr["occurred_at"],
+                        estimated_affected_population=sr["estimated_affected_population"],
+                        estimated_damage_severity=sr["estimated_damage_severity"],
+                        road_accessible=sr["road_accessible"],
+                        status=sr["status"],
+                        admin_notes=sr["admin_notes"],
+                        reviewed_by_id=sr["reviewed_by_id"],
+                        reviewed_at=sr["reviewed_at"],
+                    )
+                    session.add(rep_obj)
+            logger.info("Sample citizen disaster reports seeded for review workflow.")
+
         await session.commit()
         logger.info("Database seeding completed successfully.")
+
 
 
 if __name__ == "__main__":

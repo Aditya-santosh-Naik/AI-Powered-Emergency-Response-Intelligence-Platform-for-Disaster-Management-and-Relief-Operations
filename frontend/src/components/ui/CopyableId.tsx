@@ -38,3 +38,4 @@ export const CopyableId: React.FC<CopyableIdProps> = ({ id, prefix, className = 
     </button>
   );
 };
+

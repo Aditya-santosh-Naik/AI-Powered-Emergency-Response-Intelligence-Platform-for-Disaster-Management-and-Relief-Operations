@@ -14,6 +14,18 @@ class Settings(BaseSettings):
     ingestion_interval_minutes: int = 30
     firms_map_key: str = ""
 
+    # Auth & JWT configuration
+    jwt_secret_key: str = "emergency_response_secret_key_change_in_production_2026"
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 1440  # 24 hours
+
+    # Provisioned accounts for demonstration & mentor review
+    initial_admin_email: str = "admin@emergency.gov"
+    initial_admin_password: str = "Admin@1234"
+    initial_demo_reporter_email: str = "reporter@emergency.gov"
+    initial_demo_reporter_password: str = "Reporter@1234"
+
+
     # Grid classification defaults
     grid_cell_size_deg: float = 0.05  # ~5.5km at equator
     severity_weight_hazard: float = 0.4
