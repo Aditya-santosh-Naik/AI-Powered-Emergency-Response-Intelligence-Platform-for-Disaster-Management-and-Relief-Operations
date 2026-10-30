@@ -13,7 +13,7 @@ import { ReportDisasterPage } from "./pages/ReportDisasterPage";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage";
 
 import { AuthProvider } from "./context/AuthContext";
-import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import { ThemeProvider } from "./context/ThemeContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,58 +25,46 @@ const queryClient = new QueryClient({
   },
 });
 
-const AppShell: React.FC = () => {
-  const { theme } = useTheme();
-
-  return (
-    <BrowserRouter>
-      {/* Atmospheric Panoramic Mountain Backdrop */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <img
-          src={
-            theme === "light"
-              ? "/src/assets/textures/mountain-backdrop-light.svg"
-              : "/src/assets/textures/mountain-backdrop.svg"
-          }
-          alt=""
-          aria-hidden="true"
-          className="w-full h-full object-cover opacity-45 dark:opacity-40 transition-opacity duration-500 scale-105"
-        />
-        <div className="absolute inset-0 bg-[#F3F6FC]/70 dark:bg-slate-950/80 backdrop-blur-[2px] transition-colors duration-300" />
-      </div>
-
-      {/* Platform Application Shell */}
-      <div className="relative z-10 min-h-screen flex flex-col font-sans overflow-x-hidden text-text-primary selection:bg-blue-500/25 selection:text-blue-600 dark:selection:text-sky-400">
-        <Navbar />
-
-        <div className="flex-1 flex overflow-hidden">
-          <Sidebar />
-          <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-            <Routes>
-              <Route path="/" element={<MapPage />} />
-              <Route path="/events" element={<EventsPage />} />
-              <Route path="/predictions" element={<PredictionsPage />} />
-              <Route path="/inventory" element={<InventoryPage />} />
-              <Route path="/donors" element={<DonorsPage />} />
-              <Route path="/report" element={<ReportDisasterPage />} />
-              <Route path="/admin" element={<AdminDashboardPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-        </div>
-
-        <OperationalTicker />
-      </div>
-    </BrowserRouter>
-  );
-};
-
 export const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <AppShell />
+          <BrowserRouter>
+            {/* Atmospheric Panoramic Mountain Backdrop */}
+            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+              <img
+                src="/src/assets/textures/mountain-backdrop.svg"
+                alt=""
+                aria-hidden="true"
+                className="w-full h-full object-cover opacity-15 dark:opacity-35 transition-opacity duration-300 scale-105"
+              />
+              <div className="absolute inset-0 bg-[#F3F6FC]/90 dark:bg-slate-950/80 backdrop-blur-[1px] transition-colors duration-300" />
+            </div>
+
+            {/* Platform Application Shell */}
+            <div className="relative z-10 min-h-screen flex flex-col font-sans overflow-x-hidden text-text-primary selection:bg-blue-500/25 selection:text-blue-600 dark:selection:text-sky-400">
+              <Navbar />
+
+              <div className="flex-1 flex overflow-hidden">
+                <Sidebar />
+                <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+                  <Routes>
+                    <Route path="/" element={<MapPage />} />
+                    <Route path="/events" element={<EventsPage />} />
+                    <Route path="/predictions" element={<PredictionsPage />} />
+                    <Route path="/inventory" element={<InventoryPage />} />
+                    <Route path="/donors" element={<DonorsPage />} />
+                    <Route path="/report" element={<ReportDisasterPage />} />
+                    <Route path="/admin" element={<AdminDashboardPage />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </main>
+              </div>
+
+              <OperationalTicker />
+            </div>
+          </BrowserRouter>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
