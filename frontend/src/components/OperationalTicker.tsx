@@ -44,7 +44,7 @@ export const OperationalTicker: React.FC = () => {
   const displayedItems = [...items.slice(offsetIndex), ...items.slice(0, offsetIndex)];
 
   return (
-    <footer className="h-10 glass-panel border-t border-border-subtle flex items-center justify-between px-4 text-xs select-none shrink-0 z-40">
+    <footer className="h-10 glass-panel border-t border-border-subtle flex items-center justify-between px-4 text-xs select-none shrink-0 z-40 bg-white/95 dark:bg-slate-900/90 shadow-sm">
       {/* Ticker Lead */}
       <div className="flex items-center space-x-2.5 shrink-0 border-r border-border-subtle pr-4">
         <span className="relative flex h-2.5 w-2.5">
@@ -66,11 +66,11 @@ export const OperationalTicker: React.FC = () => {
         >
           {displayedItems.map((item, idx) => (
             <div key={idx} className="flex items-center space-x-2 text-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
-              <span className="font-mono text-text-tertiary text-[11px]">{item.time}</span>
-              <span className="font-semibold text-text-primary">{item.source}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-sky-400" />
+              <span className="font-mono text-text-tertiary text-[11px] font-medium">{item.time}</span>
+              <span className="font-bold text-text-primary">{item.source}</span>
               <span className="text-text-tertiary">—</span>
-              <span className="text-text-secondary truncate max-w-xs md:max-w-md">{item.title}</span>
+              <span className="text-text-secondary truncate max-w-xs md:max-w-md font-medium">{item.title}</span>
             </div>
           ))}
         </div>
@@ -84,7 +84,7 @@ export const OperationalTicker: React.FC = () => {
           className="p-1 rounded-md hover:bg-surface-3 text-text-tertiary hover:text-text-primary transition"
           title={isPaused ? "Resume Ticker" : "Pause Ticker"}
         >
-          {isPaused ? <Play className="w-3.5 h-3.5 text-emerald-500" /> : <Pause className="w-3.5 h-3.5" />}
+          {isPaused ? <Play className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Pause className="w-3.5 h-3.5" />}
         </button>
         <button
           type="button"

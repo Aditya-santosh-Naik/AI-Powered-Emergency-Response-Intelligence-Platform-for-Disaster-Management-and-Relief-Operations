@@ -23,21 +23,21 @@ export const Button: React.FC<ButtonProps> = ({
 
   const sizeStyles = {
     sm: "h-8 px-3 text-xs gap-1.5",
-    md: "h-9 px-4 text-xs font-semibold gap-2",
-    lg: "h-11 px-5 text-sm font-semibold gap-2.5",
+    md: "h-9 px-4 text-xs font-bold gap-2",
+    lg: "h-11 px-5 text-sm font-bold gap-2.5",
   }[size];
 
   const variantStyles = {
     primary:
-      "bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white shadow-md shadow-sky-500/20 active:scale-[0.99]",
+      "bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md shadow-blue-500/20 active:scale-[0.99] dark:bg-gradient-to-r dark:from-sky-500 dark:to-blue-600",
     secondary:
-      "glass-card text-text-primary hover:bg-surface-3 border border-border-subtle hover:border-border-strong shadow-sm",
+      "bg-white dark:bg-slate-800 text-text-primary hover:bg-slate-50 dark:hover:bg-slate-700 border border-border-subtle hover:border-border-strong shadow-sm font-semibold",
     ghost:
-      "bg-transparent text-text-secondary hover:text-text-primary hover:bg-surface-3",
+      "bg-transparent text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800 font-medium",
     danger:
-      "bg-red-500/15 text-red-500 dark:text-red-400 border border-red-500/30 hover:bg-red-500/25",
+      "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 dark:bg-red-500/15 dark:text-red-400 dark:border-red-500/30 font-semibold",
     accent:
-      "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25",
+      "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30 font-semibold",
   }[variant];
 
   return (

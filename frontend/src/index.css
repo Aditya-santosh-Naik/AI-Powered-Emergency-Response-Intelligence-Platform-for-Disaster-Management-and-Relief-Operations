@@ -8,11 +8,11 @@
   /* Default: Dark Theme */
   --bg-app: #0A101C;
   --bg-sidebar: #0D1424;
-  --surface-1: rgba(17, 26, 45, 0.75);
-  --surface-2: rgba(23, 35, 58, 0.8);
-  --surface-3: rgba(29, 43, 70, 0.85);
-  --border-subtle: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.18);
+  --surface-1: rgba(17, 26, 45, 0.85);
+  --surface-2: rgba(23, 35, 58, 0.85);
+  --surface-3: rgba(29, 43, 70, 0.9);
+  --border-subtle: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.22);
   --text-primary: #F8FAFC;
   --text-secondary: #94A3B8;
   --text-tertiary: #64748B;
@@ -36,23 +36,32 @@
 }
 
 html.light {
-  /* Light Theme Glassmorphism */
-  --bg-app: #F1F5F9;
-  --bg-sidebar: rgba(255, 255, 255, 0.85);
-  --surface-1: rgba(255, 255, 255, 0.82);
-  --surface-2: rgba(248, 250, 252, 0.88);
-  --surface-3: rgba(241, 245, 249, 0.95);
-  --border-subtle: rgba(226, 232, 240, 0.8);
-  --border-strong: rgba(203, 213, 225, 0.9);
-  --text-primary: #0F172A;
+  /* Premium Light Theme Glassmorphism Tokens (Mandated Specification) */
+  --bg-app: #F3F6FC;
+  --bg-sidebar: rgba(255, 255, 255, 0.95);
+  --surface-1: rgba(255, 255, 255, 0.92);
+  --surface-2: #FFFFFF;
+  --surface-3: #F1F5F9;
+  --border-subtle: #DCE5F0;
+  --border-strong: #CBD5E1;
+  --text-primary: #17243A;
   --text-secondary: #475569;
   --text-tertiary: #64748B;
   --text-disabled: #94A3B8;
 
-  --accent: #0284C7;
-  --accent-hover: #0369A1;
+  --accent: #2563EB;
+  --accent-hover: #1D4ED8;
   --accent-contrast: #FFFFFF;
-  --focus-ring: #0284C7;
+  --focus-ring: #2563EB;
+
+  --sev-critical: #DC2626;
+  --sev-high: #EA580C;
+  --sev-medium: #D97706;
+  --sev-low: #16A34A;
+  --sev-unknown: #64748B;
+
+  --status-success: #16A34A;
+  --status-info: #2563EB;
 
   color-scheme: light;
 }
@@ -69,12 +78,17 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Glassmorphism Classes */
+/* Glassmorphic Panel Classes */
 .glass-panel {
   background: var(--surface-1);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dark .glass-panel {
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
 .glass-card {
@@ -83,11 +97,16 @@ body {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
 }
 
 .glass-card:hover {
   background: var(--surface-3);
   border-color: var(--border-strong);
+}
+
+.dark .glass-card {
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.25);
 }
 
 /* Select option fallback styling */
@@ -98,7 +117,7 @@ select option {
 
 html.light select option {
   background-color: #FFFFFF;
-  color: #0F172A;
+  color: #17243A;
 }
 
 /* Tabular numerals for stats and tables */
@@ -135,6 +154,7 @@ html.light select option {
 .leaflet-container {
   width: 100%;
   height: 100%;
+  min-height: 400px;
   z-index: 10;
   background-color: #0d1527 !important;
 }
@@ -150,7 +170,11 @@ html.light .leaflet-container {
   color: var(--text-primary) !important;
   border-radius: 12px !important;
   border: 1px solid var(--border-strong) !important;
-  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.15) !important;
+}
+
+.dark .leaflet-popup-content-wrapper {
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.5) !important;
 }
 
 .leaflet-popup-tip {

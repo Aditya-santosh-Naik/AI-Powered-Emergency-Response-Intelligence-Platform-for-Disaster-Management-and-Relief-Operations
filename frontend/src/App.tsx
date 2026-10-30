@@ -37,13 +37,13 @@ export const App: React.FC = () => {
                 src="/src/assets/textures/mountain-backdrop.svg"
                 alt=""
                 aria-hidden="true"
-                className="w-full h-full object-cover opacity-60 dark:opacity-35 transition-opacity duration-300 scale-105"
+                className="w-full h-full object-cover opacity-15 dark:opacity-35 transition-opacity duration-300 scale-105"
               />
-              <div className="absolute inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-[2px] transition-colors duration-300" />
+              <div className="absolute inset-0 bg-[#F3F6FC]/90 dark:bg-slate-950/80 backdrop-blur-[1px] transition-colors duration-300" />
             </div>
 
             {/* Platform Application Shell */}
-            <div className="relative z-10 min-h-screen flex flex-col font-sans overflow-x-hidden selection:bg-sky-500/25 selection:text-sky-400">
+            <div className="relative z-10 min-h-screen flex flex-col font-sans overflow-x-hidden text-text-primary selection:bg-blue-500/25 selection:text-blue-600 dark:selection:text-sky-400">
               <Navbar />
 
               <div className="flex-1 flex overflow-hidden">
