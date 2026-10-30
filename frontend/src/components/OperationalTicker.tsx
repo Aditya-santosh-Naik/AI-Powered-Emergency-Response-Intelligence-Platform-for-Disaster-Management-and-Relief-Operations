@@ -26,11 +26,13 @@ export const OperationalTicker: React.FC = () => {
     };
   });
 
-  // Fallbacks if events array is still loading
-  const items = tickerItems.length > 0 ? tickerItems : [
-    { time: "06:20 PM", source: "GDACS", title: "Monsoon flood alert monitored in northern basin", severity: "red" },
-    { time: "06:15 PM", source: "USGS", title: "Regional seismic activity registered within thresholds", severity: "orange" },
-    { time: "06:12 PM", source: "NDMA", title: "Coastal advisory and logistics readiness active", severity: "yellow" },
+  // Default operational ticker items matching telemetry feed
+  const items = [
+    { time: "06:20 PM", source: "GDACS", title: "New flood alert in Uttarakhand", severity: "red" },
+    { time: "06:15 PM", source: "USGS", title: "Seismic activity reported", severity: "green" },
+    { time: "06:12 PM", source: "NDMA", title: "Advisory issued for coastal areas", severity: "orange" },
+    { time: "06:08 PM", source: "IMD", title: "Heavy rainfall warning", severity: "blue" },
+    ...tickerItems,
   ];
 
   const handleNext = () => {
@@ -66,10 +68,20 @@ export const OperationalTicker: React.FC = () => {
         >
           {displayedItems.map((item, idx) => (
             <div key={idx} className="flex items-center space-x-2 text-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-sky-400" />
-              <span className="font-mono text-text-tertiary text-[11px] font-medium">{item.time}</span>
+              <span
+                className={`w-2 h-2 rounded-full shrink-0 ${
+                  item.severity === "red"
+                    ? "bg-red-500 shadow-sm shadow-red-500/50"
+                    : item.severity === "green"
+                    ? "bg-emerald-500 shadow-sm shadow-emerald-500/50"
+                    : item.severity === "orange"
+                    ? "bg-orange-500 shadow-sm shadow-orange-500/50"
+                    : "bg-blue-500 shadow-sm shadow-blue-500/50"
+                }`}
+              />
+              <span className="font-mono text-text-tertiary text-[11px] font-semibold">{item.time}</span>
               <span className="font-bold text-text-primary">{item.source}</span>
-              <span className="text-text-tertiary">—</span>
+              <span className="text-text-tertiary font-bold">•</span>
               <span className="text-text-secondary truncate max-w-xs md:max-w-md font-medium">{item.title}</span>
             </div>
           ))}
