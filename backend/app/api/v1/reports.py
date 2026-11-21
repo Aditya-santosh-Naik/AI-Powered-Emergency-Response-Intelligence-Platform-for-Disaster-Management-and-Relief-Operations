@@ -6,12 +6,12 @@ from datetime import UTC, datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from ml.excel_generator import generate_excel_workbook
 from shapely.geometry import Point
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.api.v1.utils import geom_to_geojson
 from app.db import get_db
 from app.models import DisasterEvent, DisasterReport, ImpactZone, PredictionHistory, User
 from app.schemas import (
@@ -22,12 +22,9 @@ from app.schemas import (
     ZonePredictionOut,
 )
 from app.services.auth import get_current_user, require_admin, require_reporter
-from app.services.impact import assess_event_impact
 from app.services.prediction import (
-    get_depot_inventory_totals,
     predict_event_resource_needs,
 )
-from ml.excel_generator import generate_excel_workbook
 
 logger = logging.getLogger(__name__)
 

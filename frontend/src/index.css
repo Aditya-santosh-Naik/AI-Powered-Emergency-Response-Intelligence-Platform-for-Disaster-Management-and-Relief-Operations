@@ -204,3 +204,52 @@ html.light .leaflet-container {
 .leaflet-control-attribution a {
   color: var(--text-secondary) !important;
 }
+
+/* ── Mobile responsive rules ────────────────────────────── */
+@media (max-width: 767px) {
+  .leaflet-container {
+    min-height: 300px;
+  }
+}
+
+/* ── fadeInUp animation ─────────────────────────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.35s ease-out both;
+}
+
+/* ── Print styles ───────────────────────────────────────── */
+@media print {
+  nav,
+  aside,
+  header,
+  .news-ticker,
+  .ticker,
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .glass-panel,
+  .glass-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+  }
+}

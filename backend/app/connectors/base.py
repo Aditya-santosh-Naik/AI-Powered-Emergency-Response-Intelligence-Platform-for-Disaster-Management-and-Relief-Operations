@@ -9,7 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import DisasterEvent, IngestionRun
 
-
 logger = logging.getLogger(__name__)
 
 

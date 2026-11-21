@@ -308,3 +308,123 @@ class DisasterReport(Base):
     )
 
 
+
+# ==============================================================================
+# WEEKS 5-6: LOGISTICS PLANNING, OPTIMIZATION & DISASTER OPERATIONS MODELS
+# ==============================================================================
+
+class AllocationPlan(Base):
+    __tablename__ = "allocation_plan"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    event_id = Column(UUID(as_uuid=True), ForeignKey("disaster_event.id", ondelete="SET NULL"), nullable=True)
+    solver_status = Column(String(50), nullable=False, default="OPTIMAL")  # OPTIMAL, FEASIBLE, INFEASIBLE
+    objective_value = Column(Float, nullable=False, default=0.0)
+    total_demand_satisfied_pct = Column(Float, nullable=False, default=0.0)
+    execution_time_ms = Column(Float, nullable=False, default=0.0)
+    solver_parameters = Column(JSONB, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    event = relationship("DisasterEvent")
+    details = relationship("AllocationDetail", back_populates="plan", cascade="all, delete-orphan")
+    missions = relationship("ReliefMission", back_populates="plan")
+
+
+class AllocationDetail(Base):
+    __tablename__ = "allocation_detail"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    plan_id = Column(UUID(as_uuid=True), ForeignKey("allocation_plan.id", ondelete="CASCADE"), nullable=False)
+    depot_id = Column(UUID(as_uuid=True), ForeignKey("depot.id", ondelete="CASCADE"), nullable=False)
+    prediction_id = Column(UUID(as_uuid=True), ForeignKey("resource_prediction.id", ondelete="CASCADE"), nullable=False)
+    resource_type = Column(String(50), nullable=False)
+    allocated_quantity = Column(Integer, nullable=False, default=0)
+    demanded_quantity = Column(Integer, nullable=False, default=0)
+    shortage_quantity = Column(Integer, nullable=False, default=0)
+    distance_km = Column(Float, nullable=True)
+    est_duration_hours = Column(Float, nullable=True)
+    accessibility_status = Column(String(50), nullable=True, default="Accessible")
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    plan = relationship("AllocationPlan", back_populates="details")
+    depot = relationship("Depot")
+    prediction = relationship("ResourcePrediction")
+
+
+class PriorityOverride(Base):
+    __tablename__ = "priority_override"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    prediction_id = Column(UUID(as_uuid=True), ForeignKey("resource_prediction.id", ondelete="CASCADE"), nullable=False)
+    original_urgency_score = Column(Float, nullable=False)
+    original_urgency_class = Column(String(50), nullable=False)
+    overridden_urgency_score = Column(Float, nullable=False)
+    overridden_urgency_class = Column(String(50), nullable=False)
+    justification = Column(Text, nullable=False)
+    authorized_by_id = Column(UUID(as_uuid=True), ForeignKey("app_user.id", ondelete="SET NULL"), nullable=True)
+    is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    prediction = relationship("ResourcePrediction")
+    authorized_by = relationship("User")
+
+
+class ReliefMission(Base):
+    __tablename__ = "relief_mission"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    mission_code = Column(String(100), unique=True, nullable=False, index=True)
+    plan_id = Column(UUID(as_uuid=True), ForeignKey("allocation_plan.id", ondelete="SET NULL"), nullable=True)
+    depot_id = Column(UUID(as_uuid=True), ForeignKey("depot.id", ondelete="CASCADE"), nullable=False)
+    prediction_id = Column(UUID(as_uuid=True), ForeignKey("resource_prediction.id", ondelete="CASCADE"), nullable=False)
+    status = Column(String(50), nullable=False, default="PLANNED", index=True)  # PLANNED, ASSIGNED, DISPATCHED, IN_TRANSIT, DELIVERED, COMPLETED, CANCELLED
+    team_leader = Column(String(255), nullable=True)
+    vehicle_type = Column(String(100), nullable=False, default="Heavy Cargo Truck")
+    vehicle_identifier = Column(String(100), nullable=True)
+    manifest = Column(JSONB, nullable=True)
+    route_geojson = Column(JSONB, nullable=True)
+    distance_km = Column(Float, nullable=True)
+    est_duration_hours = Column(Float, nullable=True)
+    notes = Column(Text, nullable=True)
+    dispatched_at = Column(DateTime(timezone=True), nullable=True)
+    delivered_at = Column(DateTime(timezone=True), nullable=True)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    plan = relationship("AllocationPlan", back_populates="missions")
+    depot = relationship("Depot")
+    prediction = relationship("ResourcePrediction")
+    transactions = relationship("ResourceTransaction", back_populates="mission")
+
+
+class ResourceTransaction(Base):
+    __tablename__ = "resource_transaction"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    depot_id = Column(UUID(as_uuid=True), ForeignKey("depot.id", ondelete="CASCADE"), nullable=False)
+    mission_id = Column(UUID(as_uuid=True), ForeignKey("relief_mission.id", ondelete="SET NULL"), nullable=True)
+    resource_type = Column(String(50), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    state_from = Column(String(50), nullable=False)
+    state_to = Column(String(50), nullable=False)
+    reference_note = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    depot = relationship("Depot")
+    mission = relationship("ReliefMission", back_populates="transactions")
+
+
+class SituationReport(Base):
+    __tablename__ = "situation_report"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    event_id = Column(UUID(as_uuid=True), ForeignKey("disaster_event.id", ondelete="CASCADE"), nullable=False)
+    report_title = Column(String(255), nullable=False)
+    summary = Column(Text, nullable=False)
+    metrics = Column(JSONB, nullable=False)
+    created_by_id = Column(UUID(as_uuid=True), ForeignKey("app_user.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    event = relationship("DisasterEvent")
+    created_by = relationship("User")

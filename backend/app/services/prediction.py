@@ -4,29 +4,18 @@ import logging
 from datetime import UTC, datetime
 from uuid import UUID
 
+from ml.inference import predict_zone_resource_demand
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.models import (
-    Depot,
     DisasterEvent,
     GridCell,
     ImpactZone,
-    InventoryItem,
     PredictionHistory,
     ResourcePrediction,
-    ResourceType,
 )
 from app.services.inventory import get_inventory_summary
-from ml.config import (
-    DATA_STATUS_OPERATIONAL,
-    MODEL_VERSION,
-    TARGET_COLUMNS,
-    TARGET_METADATA,
-)
-from ml.inference import load_inference_artifacts, predict_zone_resource_demand
-from ml.scenario import simulate_zone_scenario
 
 logger = logging.getLogger(__name__)
 
@@ -109,8 +98,7 @@ async def predict_event_resource_needs(
     impact_zones = iz_res.scalars().all()
 
     gc_stmt = select(GridCell).where(GridCell.event_id == event_id).order_by(GridCell.severity_score.desc())
-    gc_res = await db.execute(gc_stmt)
-    grid_cells = gc_res.scalars().all()
+    _ = await db.execute(gc_stmt)
 
     # Aggregate stock across active depots for inventory reconciliation
     verified_inventory = await get_depot_inventory_totals(db)
@@ -135,7 +123,7 @@ async def predict_event_resource_needs(
     if impact_zones:
         for iz in impact_zones:
             pop = iz.population_exposed if iz.population_exposed and iz.population_exposed > 0 else 5000
-            bld = iz.building_count if iz.building_count and iz.building_count > 0 else 500
+            _ = iz.building_count if iz.building_count and iz.building_count > 0 else 500
             area = iz.area_sq_km if iz.area_sq_km and iz.area_sq_km > 0 else 10.0
             density = pop / area
 

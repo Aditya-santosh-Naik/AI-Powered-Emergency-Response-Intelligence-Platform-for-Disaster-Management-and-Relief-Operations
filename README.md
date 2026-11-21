@@ -1,8 +1,16 @@
 # AI-Powered Emergency Response Intelligence Platform
 
-> **Active Phase: Weeks 1–2 Only** — Disaster Data Ingestion & Geospatial Impact Assessment.
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](file:///d:/Infosys%20%20disaster/internship)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet&logoColor=white)](https://leafletjs.com)
+[![OR--Tools](https://img.shields.io/badge/Google%20OR--Tools-SCIP%20MILP-4285F4?logo=google&logoColor=white)](https://developers.google.com/optimization)
+[![XGBoost](https://img.shields.io/badge/XGBoost-MultiOutput-EB4034)](https://xgboost.readthedocs.io)
 
-A geospatial intelligence and resource coordination platform designed for disaster management agencies (NDMA/SDRF) and humanitarian response partners. The system continuously polls global and national disaster feeds, calculates geographic impact footprints and zonal population exposure, computes infrastructure density from OpenStreetMap, classifies disaster impact into a multi-attribute severity grid, and tracks critical relief supplies across regional logistics depots.
+> **Complete Platform Scope: Weeks 1 through 8** — Ingestion, Geospatial Footprints, ML Demand Prediction, Linear Programming Optimization, Multi-State Routing, Mission Operations, and Post-Event Analytics.
+
+A mission-critical geospatial AI and humanitarian logistics orchestration platform engineered for National and State Disaster Management Authorities (**NDMA / SDRF**) and humanitarian coordination partners. The platform unites continuous real-time multi-source data ingestion, demographic exposure modeling, multi-output machine learning resource forecasting, Google OR-Tools constrained logistics optimization, NetworkX-driven road routing, frontline convoy dispatching, and post-event situation reporting.
 
 ---
 
@@ -10,78 +18,79 @@ A geospatial intelligence and resource coordination platform designed for disast
 
 ```mermaid
 flowchart TD
-    subgraph Ingestion["Ingestion Engine (APScheduler)"]
+    subgraph Ingestion["1. Multi-Feed Ingestion (APScheduler)"]
         GDACS["GDACS Feed (RSS / REST)"]
         USGS["USGS Feed (GeoJSON)"]
-        NDMA["NDMA Portal / Fixture"]
-        FIRMS["NASA FIRMS Satellite Hotspots"]
+        NDMA["NDMA Portal & Fixtures"]
+        FIRMS["NASA FIRMS Satellite Thermal"]
     end
 
-    subgraph Backend["FastAPI Backend (Port 8000)"]
-        Connectors["Feed Connectors & Upsert Engine"]
-        ImpactEngine["Geospatial Impact Assessment Engine"]
-        GridEngine["Severity Grid Generator (0.05° Cells)"]
-        InventoryService["Logistics & Inventory Manager"]
-        DonorsService["Donor & Aid Consignment Manager"]
+    subgraph Impact["2. Geospatial Impact Assessment"]
+        Footprint["Dynamic Hazard Footprints (Radius / Polygons)"]
+        WorldPop["Rasterio Population Exposure Extraction"]
+        OSM["OpenStreetMap Infrastructure Densities"]
+        GridEngine["0.05° Severity Grid Partitioning (0-100 Score)"]
     end
 
-    subgraph Data["Geospatial Data Layer"]
-        WorldPop["Synthetic / WorldPop Population Raster (GeoTIFF)"]
-        OSM["OpenStreetMap Overpass API (with Caching & Fallback)"]
-        DB[("PostGIS 16 / Spatial SQLite")]
+    subgraph ML["3. Predictive Intelligence (Weeks 3-4)"]
+        XGB["XGBoost 4-Target Demand Regressor"]
+        Intervals["80% Confidence Quantile Bounds"]
+        Vuln["Demographic Vulnerability Multipliers"]
+        Scenarios["What-If Operational Shock Simulator"]
     end
 
-    subgraph Frontend["React 18 + Vite + Leaflet (Port 5173)"]
-        DisasterMap["Interactive Geospatial Map View"]
-        EventsFeed["Disaster Events Intelligence Feed"]
-        ResourceTracker["Logistics Depots & Stock Management"]
-        DonorsHub["Donor Directory & Aid Consignments"]
+    subgraph Logistics["4. Logistics Planning & Operations (Weeks 5-6)"]
+        ORTools["Google OR-Tools MILP Solver (SCIP)"]
+        Overrides["Commander Priority Override Audit Engine"]
+        Router["NetworkX 28-Hub Highway Routing Engine"]
+        Missions["Relief Mission Convoy State Machine"]
+        SitRep["Post-Event Analytics & SitRep Markdown Generator"]
     end
 
-    Ingestion --> Connectors
-    Connectors --> DB
-    ImpactEngine --> WorldPop
-    ImpactEngine --> OSM
-    ImpactEngine --> DB
-    GridEngine --> DB
-    InventoryService --> DB
-    DonorsService --> DB
-    Backend <--> Frontend
+    subgraph UI["5. Command Dashboard (React 19 + Leaflet)"]
+        Map["Real-Time Indian Geospatial Command Map"]
+        CommandDesk["Operations Command Center (/command)"]
+        MissionPanel["Field Mission Assignment Board (/missions)"]
+        SitRepViewer["Situation Report Synthesis (/sitrep)"]
+        AdminDesk["Citizen Report Triage & ML Predictor (/admin)"]
+    end
+
+    Ingestion --> Impact
+    Impact --> ML
+    ML --> Logistics
+    Logistics <--> UI
 ```
 
 ---
 
-## Core Capabilities (Weeks 1–2 Scope)
+## Core Capabilities Across Weeks 1–8
 
-1. **Multi-Source Disaster Ingestion (`R1`)**:
-   - Automated ingestion of Cyclones, Floods, Earthquakes, and Wildfires from **GDACS**, **USGS**, **NDMA**, and **NASA FIRMS**.
-   - Idempotent upsert matching on `(source, external_id)` to avoid duplicate event records.
-   - Background periodic polling managed by `APScheduler` with manual trigger endpoint (`POST /api/v1/ingestion/trigger`).
-   - Detailed run logging (`ingestion_run` table) with source status, duration, records added, and error messages.
+### 1. Disaster Data Ingestion & Impact Assessment (Weeks 1–2)
+- **Continuous Multi-Feed Polling**: Automated polling of GDACS, USGS, NDMA, and NASA FIRMS feeds managed by `APScheduler` with manual trigger capabilities.
+- **Geospatial Exposure Modeling**: Dynamic hazard footprints (magnitude-derived radii for earthquakes, circular/polygon buffers for floods, cyclones, and wildfires).
+- **Zonal Population & Infrastructure Extraction**: High-performance demographic exposure calculations via raster zonal statistics (`rasterio`) and OpenStreetMap building counts.
+- **0.05° Severity Grid**: Composite scoring combining hazard intensity (40%), population exposure (35%), and structural density (25%) into color-coded severity tiers.
 
-2. **Geospatial Impact Assessment (`R2`)**:
-   - Dynamic footprint calculation:
-     - **Earthquakes**: Circular hazard radius derived from magnitude ($R = 10^{(0.5 \cdot M - 1.2)}$ km).
-     - **Floods**: Geospatial buffer around reported coordinates ($25\text{ km}$).
-     - **Cyclones**: Radiative wind impact zone ($100\text{ km}$).
-     - **Wildfires**: Perimeter thermal buffer ($15\text{ km}$).
-   - Population exposure analysis using raster zonal statistics (`rasterio`) over synthetic or WorldPop density rasters.
-   - Infrastructure impact assessment via OpenStreetMap Overpass API building counts with caching and statistical estimation fallback.
+### 2. Machine Learning Resource Demand Prediction (Weeks 3–4)
+- **Multi-Output Gradient Boosting**: Trained XGBoost regressor predicting 4 critical humanitarian commodities: **Food Packets**, **Drinking Water (Liters)**, **Medical Emergency Kits**, and **Shelter Spaces**.
+- **Quantile Uncertainty Bounds**: 80% prediction intervals ($\alpha = 0.10, \alpha = 0.90$) identifying conservative buffer requirements.
+- **Vulnerability Profiling**: Isolates pediatric, geriatric, and medical dependency shares to scale relief without double-counting general population.
+- **Live Scenario Simulator**: Allows emergency coordinators to model demand surges under severe road blockages or population displacements.
 
-3. **Resource Inventory & Logistics (`R3`)**:
-   - 5 strategic regional logistics hubs: New Delhi, Guwahati, Bhubaneswar, Kochi, Mumbai.
-   - Essential emergency resources tracked: Food Packets, Drinking Water, Medical Kits, Rescue Vehicles, Field Personnel.
-   - Stock adjustments with strict database validation rejecting transactions resulting in negative stock.
-   - Network-wide aggregation metrics for executive operational awareness.
+### 3. Logistics Optimization & Operations Command (Weeks 5–6)
+- **Google OR-Tools Linear Programming Solver**: Formulates a Mixed-Integer Linear Programming (MILP) model allocating depot stocks across affected sectors, maximizing demand fulfillment while penalizing transit haulage.
+- **Logistics Transit Routing**: NetworkX weighted graph modeling 28 Indian National Highway trunk hubs with Haversine distance, truck transit duration, and road accessibility degradation.
+- **Commander Priority Overrides**: Authorizes emergency directors to manually elevate sector urgency scores with mandatory justifications and complete audit logging.
+- **Relief Mission Management**: End-to-end convoy lifecycle state machine (`ASSIGNED` $\rightarrow$ `DISPATCHED` $\rightarrow$ `IN_TRANSIT` $\rightarrow$ `DELIVERED` $\rightarrow$ `COMPLETED`) with stock reservation ledgers.
+- **Automated Situation Reports (SitRep)**: Instant post-event synthesis generating official directives with demographic summaries, fulfillment ratios, and downloadable Markdown reports.
 
-4. **Severity Grid Classification (`R4`)**:
-   - Automatic generation of 0.05° (~5.5 km) bounding box grid cells covering disaster footprints.
-   - Composite severity scoring ($0 \dots 100$) combining hazard intensity (40%), population exposure (35%), and building density (25%).
-   - Color-coded severity classes: **Low** (Green), **Moderate** (Yellow), **High** (Orange), **Critical** (Red).
-
-5. **Relief Aid & Donors (`D1`)**:
-   - Partner directory tracking NGOs, bilateral aid agencies, and corporate foundations.
-   - Logging of humanitarian aid consignments that automatically replenish receiving depot stocks.
+### 4. Integration, Testing & Project Finalization (Weeks 7–8)
+- **End-to-End Pipeline Integrity**: Automated testing verifying cross-module flow from disaster feed ingestion through impact assessment, demand prediction, MILP optimization, convoy dispatch, and SitRep delivery.
+- **Historical Scenario Benchmarking**: Validated against historical disaster datasets:
+  - **2018 Great Kerala Monsoon Floods** (14 districts, 5.4M affected)
+  - **2015 Chennai Urban Deluge** (Metropolitan corridor, 1.8M affected)
+- **Locust Load Testing Suite**: Multi-user concurrent stress testing for high-availability disaster operations.
+- **Responsive Command Interface**: Glassmorphism dark/light design system with accessible tooltips, loading skeleton states, and mobile adaptation.
 
 ---
 
@@ -89,43 +98,112 @@ flowchart TD
 
 ```text
 ├── backend/
-│   ├── alembic/                 # Database migrations (PostgreSQL/PostGIS)
+│   ├── alembic/                 # Database schema migrations
 │   ├── app/
-│   │   ├── api/v1/              # FastAPI router endpoints (events, ingestion, zones, inventory, donors)
-│   │   ├── connectors/          # GDACS, USGS, NDMA, NASA FIRMS connectors
-│   │   ├── models/              # SQLAlchemy 2.0 ORM models with GeoAlchemy2
+│   │   ├── api/v1/              # 14 REST API routers
+│   │   │   ├── allocation.py    # OR-Tools resource allocation router
+│   │   │   ├── auth.py          # JWT authentication & RBAC router
+│   │   │   ├── donors.py        # Humanitarian donors & consignments
+│   │   │   ├── events.py        # Disaster event queries
+│   │   │   ├── field_ops.py     # Field operations logging
+│   │   │   ├── ingestion.py     # Feed ingestion triggers & telemetry
+│   │   │   ├── inventory.py     # Depot inventory & stock adjustments
+│   │   │   ├── missions.py      # Relief mission dispatch & state machine
+│   │   │   ├── operations.py    # Command overview & SitRep generator
+│   │   │   ├── overrides.py     # Commander priority override manager
+│   │   │   ├── predictions.py   # ML demand inference & scenarios
+│   │   │   ├── reports.py       # Citizen reporting & admin review
+│   │   │   ├── routing.py       # Highway routing & corridor graph
+│   │   │   └── zones.py         # Impact zones & severity grid cells
+│   │   ├── connectors/          # GDACS, USGS, NDMA, NASA FIRMS
+│   │   ├── models/              # SQLAlchemy 2.0 ORM models (GeoAlchemy2)
 │   │   ├── schemas/             # Pydantic v2 schemas
-│   │   ├── services/            # Impact assessment, grid generation, inventory, donors
-│   │   ├── config.py            # Central settings (Pydantic Settings)
-│   │   ├── db.py                # Dual-mode engine (PostGIS / Spatial SQLite compatibility)
+│   │   ├── services/            # Optimization, routing, ML, impact, missions
+│   │   ├── config.py            # Central configuration & dual-mode DB settings
+│   │   ├── db.py                # PostGIS / SQLite compatibility engine
 │   │   ├── main.py              # FastAPI app creation & lifecycle hooks
 │   │   └── scheduler.py         # APScheduler background polling setup
-│   ├── fixtures/                # NDMA sample data & synthetic population GeoTIFF
-│   ├── tests/                   # 13 pytest automated unit and integration tests
-│   ├── pyproject.toml           # Backend dependencies, ruff, and mypy configuration
+│   ├── fixtures/                # Verified disaster scenarios & synthetic GeoTIFFs
+│   ├── tests/                   # Automated pytest unit & integration test suite
+│   ├── locustfile.py            # Locust load & stress testing configuration
+│   ├── pyproject.toml           # Backend dependencies, ruff, and mypy config
 │   └── seed.py                  # Database seeder with realistic disaster scenarios
 ├── frontend/
 │   ├── src/
-│   │   ├── api/                 # Typed API client with auto-fallback
+│   │   ├── api/                 # Strongly typed API client
 │   │   ├── components/          # Navigation, status indicators, badges
-│   │   ├── pages/               # MapPage, EventsPage, InventoryPage, DonorsPage
+│   │   │   └── ui/              # Tooltip, SkeletonLoader, ErrorBoundary, Button, Badge
+│   │   ├── context/             # AuthContext (JWT) and ThemeContext (Dual-Theme)
+│   │   ├── pages/               # React route pages
+│   │   │   ├── CommandDashboardPage.tsx # Operations Command Center
+│   │   │   ├── MissionsPage.tsx         # Mission Assignment & Fleet Board
+│   │   │   ├── SitRepPage.tsx           # Situation Report Generator & Viewer
+│   │   │   ├── MapPage.tsx              # Interactive Indian Geospatial Map
+│   │   │   ├── AdminDashboardPage.tsx   # Citizen Report Triage Desk
+│   │   │   ├── PredictionsPage.tsx      # ML Resource Demand Explorer
+│   │   │   ├── EventsPage.tsx           # Disaster Intelligence Feed
+│   │   │   ├── InventoryPage.tsx        # Depot Stock Management
+│   │   │   ├── DonorsPage.tsx           # Partner Directory & Aid Consignments
+│   │   │   └── ReportDisasterPage.tsx   # Citizen Incident Reporting Form
+│   │   ├── test/                # Vitest unit & integration test suite
 │   │   └── types/               # TypeScript interfaces matching backend schemas
-│   ├── Dockerfile               # Production multi-stage Nginx container
-│   ├── nginx.conf               # Nginx reverse proxy configuration
-│   ├── package.json             # React 18, Vite, Tailwind CSS, Leaflet
-│   └── vite.config.ts           # Development dev server proxy configuration
+│   ├── package.json             # React 19, Vite 8, Tailwind CSS, Leaflet
+│   └── vite.config.ts           # Vite build & proxy settings
 ├── ml/
-│   ├── .gitkeep                 # Strictly preserved empty per Weeks 1–2 Scope
-│   └── README.md                # 3-line notice reserving directory for Weeks 3–4
+│   ├── artifacts/               # Serialized XGBoost model bundles (.joblib)
+│   ├── config.py                # Hyperparameters, targets, feature definitions
+│   ├── inference.py             # Inference pipeline with quantile bounds
+│   ├── models.py                # Regressor architecture & training routines
+│   ├── scenario.py              # What-if scenario shock generator
+│   ├── train.py                 # Offline model training script
+│   └── vulnerability.py         # Demographic vulnerability profile modifiers
+├── dataset/                     # 1,200-sample Excel workbook feature store
 ├── docs/
-│   ├── ARCHITECTURE.md          # Architectural specifications & formulas
-│   ├── DATA_SOURCES.md          # Ingestion feeds & external API contracts
-│   ├── ASSUMPTIONS.md           # Engineering decisions and environmental adaptations
-│   └── COMPLETION_REPORT.md     # Two-directional Scope Audit (Missing & Surplus checks)
-├── docker-compose.yml           # Production-ready PostGIS, Backend, and Frontend containers
+│   ├── ARCHITECTURE.md          # In-depth architectural & mathematical specifications
+│   ├── API_REFERENCE.md         # Exhaustive API reference for all 50+ endpoints
+│   ├── DATA_FLOW.md             # Mermaid sequence diagrams for all operations
+│   ├── MODEL_EVALUATION.md      # Empirical ML evaluation metrics & feature store
+│   ├── DEPLOYMENT_GUIDE.md      # Multi-stage Docker Compose production deployment
+│   ├── KNOWN_LIMITATIONS.md     # Engineering assumptions & technical boundaries
+│   └── PRESENTATION_NOTES.md    # PPT pitch deck outline & live demo script
+├── docker-compose.yml           # Production PostGIS, Backend, and Frontend containers
 ├── .env.example                 # Environment configuration template
 └── README.md
 ```
+
+---
+
+## REST API Reference Summary
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/v1/health` | System health status, version, and module scope |
+| `GET` | `/api/v1/events` | List disaster events with type, source, and country filters |
+| `GET` | `/api/v1/events/{id}` | Detailed event metadata with impact zones and grid cells |
+| `POST` | `/api/v1/ingestion/trigger` | Manually trigger real-time multi-feed polling |
+| `GET` | `/api/v1/ingestion/status` | List latest ingestion runs and sync telemetry |
+| `GET` | `/api/v1/grid-cells` | Retrieve classified severity grid cells for map overlays |
+| `GET` | `/api/v1/depots` | List logistics depots with geospatial coordinates |
+| `POST` | `/api/v1/inventory/adjust` | Adjust depot inventory (enforces negative stock rejection) |
+| `GET` | `/api/v1/inventory/summary` | Global supply totals aggregated across all depots |
+| `POST` | `/api/v1/donations` | Record relief consignment and auto-replenish depot inventory |
+| `POST` | `/api/v1/predictions/events/{id}/predict` | Execute 4-target ML demand predictor with 80% intervals |
+| `POST` | `/api/v1/predictions/scenarios` | Simulate what-if disaster escalation scenarios |
+| `POST` | `/api/v1/reports` | Citizen incident report submission |
+| `PATCH` | `/api/v1/reports/{id}/review` | Relief coordinator report review & validation |
+| `POST` | `/api/v1/reports/{id}/assess-and-predict` | Convert verified report to event and run prediction |
+| `POST` | `/api/v1/allocation/run` | Execute Google OR-Tools MILP logistics optimization solver |
+| `GET` | `/api/v1/allocation/plans` | Retrieve historical optimization plans & allocations |
+| `POST` | `/api/v1/allocation/plans/{id}/create-missions` | Auto-generate relief dispatch missions from plan |
+| `GET` | `/api/v1/routing/route` | Calculate road delivery route, distance, and duration |
+| `GET` | `/api/v1/routing/corridors` | Retrieve strategic national highway network waypoints |
+| `POST` | `/api/v1/overrides` | Register commander priority override for solver |
+| `GET` | `/api/v1/overrides` | List active commander priority overrides with audit logs |
+| `POST` | `/api/v1/missions` | Dispatch relief mission with route and stock reservation |
+| `GET` | `/api/v1/missions` | List relief missions across depots and sectors |
+| `PATCH` | `/api/v1/missions/{id}/status` | Advance mission operational status along state machine |
+| `GET` | `/api/v1/operations/overview` | Real-time operational KPI telemetry for command center |
+| `GET` | `/api/v1/operations/sitrep/{id}` | Generate formal Markdown Situation Report (SitRep) |
 
 ---
 
@@ -133,148 +211,104 @@ flowchart TD
 
 ### Option A: Local Standalone (Fastest for Evaluation & Demos)
 
-The project includes an automatic spatial SQLite compatibility layer, allowing complete presentation and testing on any local machine with Python 3.11+ and Node.js 18+ without needing Docker Desktop.
+The platform includes an automatic spatial SQLite compatibility engine allowing instant execution on any workstation with Python 3.11+ and Node.js 18+.
 
-#### 1. Setup Backend
+#### 1. Setup Backend:
 ```bash
 # Clone and enter workspace
 git clone <repo-url>
-cd <repo-folder>
+cd internship
 
-# Create and activate Python virtual environment
-python -m venv .venv
-# On Windows:
+# Activate virtual environment
+# Windows:
 .venv\Scripts\activate
-# On Linux/macOS:
+# Linux/macOS:
 source .venv/bin/activate
 
 # Install backend dependencies
-pip install -r backend/requirements.txt
-# Or via pyproject.toml:
 pip install -e backend
 
-# Initialize database and seed realistic disaster scenarios
+# Initialize database and seed realistic scenarios
 python backend/seed.py
 
-# Launch FastAPI backend
+# Launch FastAPI backend on port 8000
 uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 ```
-Backend API will be running at `http://127.0.0.1:8000` (Swagger UI at `http://127.0.0.1:8000/docs`).
+API runs at `http://127.0.0.1:8000` (Interactive Swagger Docs at `http://127.0.0.1:8000/docs`).
 
-#### 2. Setup Frontend
+#### 2. Setup Frontend:
 ```bash
 # In a second terminal:
 cd frontend
 npm install
 npm run dev -- --host 127.0.0.1 --port 5173
 ```
-Frontend Web UI will be running at `http://127.0.0.1:5173`.
+Command Dashboard runs at `http://127.0.0.1:5173`.
 
 ---
 
 ### Option B: Docker Compose (Full Production PostGIS Stack)
 
-Ensure Docker Desktop is installed and running.
-
 ```bash
 # 1. Copy environment template
 cp .env.example .env
 
-# 2. Build and launch all services in detached mode
+# 2. Build and launch all services
 docker compose up -d --build
 
-# 3. Apply database migrations
+# 3. Apply database migrations & seed database
 docker compose exec backend alembic upgrade head
-
-# 4. Seed database with initial scenarios
 docker compose exec backend python seed.py
 ```
 
-Access points:
-- **Frontend Dashboard**: `http://localhost:3000`
+- **Frontend Web UI**: `http://localhost:3000`
 - **Backend API Docs**: `http://localhost:8000/docs`
-- **PostGIS Database**: `localhost:5432` (`user: erp`, `database: emergency_response`)
-
----
-
-## API Endpoints Reference
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/v1/health` | Service health status and version |
-| `GET` | `/api/v1/events` | List disaster events (filters: `event_type`, `source`, `country`) |
-| `GET` | `/api/v1/events/{id}` | Detailed event metadata with impact zones and grid cells |
-| `POST` | `/api/v1/ingestion/trigger` | Manually trigger real-time polling across all feeds |
-| `GET` | `/api/v1/ingestion/status` | List latest ingestion runs and metrics |
-| `GET` | `/api/v1/zones/{id}` | Get specific impact zone polygon and zonal statistics |
-| `GET` | `/api/v1/grid-cells` | Retrieve classified severity grid cells for map rendering |
-| `GET` | `/api/v1/depots` | List logistics depots with geospatial coordinates |
-| `POST` | `/api/v1/depots` | Register a new logistics depot |
-| `GET` | `/api/v1/depots/{id}` | Retrieve specific depot inventory breakdown |
-| `POST` | `/api/v1/inventory/adjust` | Adjust depot stock (enforces negative stock rejection) |
-| `GET` | `/api/v1/inventory/summary` | Global supply totals across all resource types |
-| `GET` | `/api/v1/resource-types` | List standard relief resource catalog |
-| `GET` | `/api/v1/donors` | List registered humanitarian donor partners |
-| `POST` | `/api/v1/donors` | Register a new donor partner |
-| `GET` | `/api/v1/donations` | List logged relief aid consignments |
-| `POST` | `/api/v1/donations` | Record consignment and automatically replenish depot stock |
-| `GET` | `/api/v1/field-ops` | List field operations |
-| `POST` | `/api/v1/field-ops` | Create a new field operation |
+- **PostGIS 16 Database**: `localhost:5432`
 
 ---
 
 ## Verification & Automated Test Suite
 
-Both backend and frontend feature 100% passing automated test suites and strict static analysis:
-
 ```bash
-# Run backend pytest suite (13/13 passing)
-pytest backend/tests/
+# 1. Run Backend Automated Pytest Suite
+pytest backend/tests/ -v
 
-# Run Python linter (0 errors)
-ruff check backend
-
-# Run strict type checking (0 issues across 35 files)
-mypy backend --config-file backend/pyproject.toml
-
-# Run frontend Vitest suite (4/4 passing)
+# 2. Run Frontend Automated Vitest Suite (13/13 passing)
 cd frontend && npm test
 
-# Run frontend TypeScript & production build
+# 3. Run Production Build Validation
 npm run build
+
+# 4. Run Python Linter
+ruff check backend/
 ```
 
 ---
 
-## Presentation Walkthrough Guide
+## Presentation Walkthrough Script
 
-When presenting this project to evaluators, follow this structured demo:
+When demonstrating this project to mentors and evaluators, follow this recommended walkthrough:
 
-1. **Architecture & Scope Alignment (30 seconds)**:
-   - Highlight strict adherence to **Weeks 1–2 Scope**: Disaster Ingestion, Geospatial Footprint Generation, Population/Building Exposure, Severity Grid Classification, Depot Inventory Management, and Donor Replenishment.
-   - Point to `ml/` which remains strictly clean and empty per scope boundaries.
+1. **Geospatial Intelligence Map (`/`)**:
+   - Showcase the Indian disaster command map featuring active floods, cyclones, and seismic incidents.
+   - Toggle map layers: **Impact Footprints**, **0.05° Severity Grid Cells**, and **Strategic Regional Depots**.
+   - Inspect exposed demographics and estimated structural damage.
 
-2. **Geospatial Map (`/`)**:
-   - Demonstrate the interactive Leaflet map featuring Carto Dark Matter tiles.
-   - Show disaster event markers (floods in Assam, earthquakes in Kashmir, cyclones in Odisha).
-   - Toggle map layers: **Impact Footprints** (buffered hazard zones), **Grid Severity Cells** (color-coded by risk), and **Resource Depots** (strategic logistics hubs).
-   - Click an event marker or use the inspection drawer to highlight real-time calculated metrics: **Affected Population** (derived from population raster zonal statistics) and **Estimated Buildings Impacted** (queried from OpenStreetMap).
+2. **Citizen Incident Reporting & Coordinator Triage (`/report` & `/admin`)**:
+   - Demonstrate citizen incident reporting with damage severity and coordinate verification.
+   - Switch to the Admin Review desk, review pending reports, and approve for assessment.
+   - Click **"Run Prediction Engine"** to execute the trained XGBoost model and display 4-target demand forecasts with 80% confidence intervals.
 
-3. **Multi-Feed Ingestion Engine (`/events`)**:
-   - Click **"Sync Feeds"** in the top navigation bar to trigger live polling across GDACS, USGS, and NDMA feeds.
-   - Show the Ingestion Status indicators in the status strip.
-   - Filter events by type (e.g. Cyclone) or keyword (e.g. Assam).
-   - Click **"View Impact"** on an event to show the modal with detailed footprint radius, exposed population count, building counts, and associated grid severity cells.
+3. **Google OR-Tools Logistics Solver (`/command`)**:
+   - Navigate to the **Disaster Logistics Command Center**.
+   - Review operational overview KPIs across monitored feeds, depots, and active missions.
+   - Set the planning horizon and execute the MILP solver.
+   - Highlight optimal depot-to-zone allocations, route haul distances, and $100\%$ demand satisfaction.
 
-4. **Resource Inventory & Business Logic (`/inventory`)**:
-   - Review network aggregate supply totals in the 4 KPI cards (Food Packets, Drinking Water, Medical Kits, Rescue Vehicles).
-   - Select a depot (e.g. New Delhi) and click **"Adjust Stock"**.
-   - **Validation Proof**: Enter an invalid reduction exceeding current stock (e.g. `-999999`) and attempt to submit. Show the red error toast displaying `"Insufficient stock"`, proving that negative inventory is strictly rejected.
-   - Enter a valid positive adjustment (e.g. `+100`) and show the depot count update immediately.
+4. **Convoy Dispatch & Status Advancement (`/missions`)**:
+   - In the Command Center, click **"Auto-Generate Missions"**.
+   - Navigate to the **Missions Board**, review newly dispatched convoys, inspect manifests, and advance operational statuses.
 
-5. **Donor Registry & Automated Replenishment (`/donors`)**:
-   - Show humanitarian partners (Red Cross, UNICEF, Tata Relief).
-   - Click **"Record Aid Consignment"**.
-   - Donate 250 Medical Kits from Indian Red Cross to the New Delhi Depot.
-   - Submit and verify the consignment appears in the table.
-   - Navigate back to `/inventory` and show that the New Delhi Depot's Medical Kit inventory increased by exactly 250.
+5. **Situation Reporting (`/sitrep`)**:
+   - Review the auto-generated official Situation Report (SitRep).
+   - Demonstrate Markdown download and print-ready document rendering for disaster management executives.

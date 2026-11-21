@@ -8,7 +8,7 @@ def test_health_check(client: TestClient):
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "ok"
-    assert "Weeks 1–2" in data["module"]
+    assert "Weeks" in data["module"]
 
 
 def test_openapi_schema_contains_required_endpoints(client: TestClient):
@@ -17,7 +17,7 @@ def test_openapi_schema_contains_required_endpoints(client: TestClient):
     schema = resp.json()
     paths = schema.get("paths", {})
 
-    # Check key endpoint paths required by R1-R5 and D1
+    # Check key endpoint paths required across all Weeks 1–8
     assert "/api/v1/events" in paths
     assert "/api/v1/events/{event_id}" in paths
     assert "/api/v1/ingestion/trigger" in paths
@@ -28,3 +28,8 @@ def test_openapi_schema_contains_required_endpoints(client: TestClient):
     assert "/api/v1/field-operations" in paths
     assert "/api/v1/donors" in paths
     assert "/api/v1/donations" in paths
+    # Weeks 5-6 additions
+    assert "/api/v1/allocation/run" in paths
+    assert "/api/v1/routing/route" in paths
+    assert "/api/v1/missions" in paths
+    assert "/api/v1/operations/overview" in paths

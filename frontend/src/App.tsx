@@ -11,6 +11,9 @@ import { DonorsPage } from "./pages/DonorsPage";
 import { PredictionsPage } from "./pages/PredictionsPage";
 import { ReportDisasterPage } from "./pages/ReportDisasterPage";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage";
+import { CommandDashboardPage } from "./pages/CommandDashboardPage";
+import { MissionsPage } from "./pages/MissionsPage";
+import { SitRepPage } from "./pages/SitRepPage";
 
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -57,6 +60,9 @@ export const App: React.FC = () => {
                     <Route path="/donors" element={<DonorsPage />} />
                     <Route path="/report" element={<ReportDisasterPage />} />
                     <Route path="/admin" element={<AdminDashboardPage />} />
+                    <Route path="/command" element={<CommandDashboardPage />} />
+                    <Route path="/missions" element={<MissionsPage />} />
+                    <Route path="/sitrep" element={<SitRepPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </main>

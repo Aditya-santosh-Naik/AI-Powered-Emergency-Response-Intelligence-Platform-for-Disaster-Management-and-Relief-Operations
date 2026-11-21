@@ -21,6 +21,12 @@ import type {
   DisasterReportCreate,
   DisasterReportReviewRequest,
   DisasterReportAssessmentResponse,
+  AllocationPlan,
+  PriorityOverride,
+  ReliefMission,
+  ResourceTransaction,
+  OperationsOverview,
+  SituationReportData,
 } from "../types";
 
 
@@ -225,5 +231,95 @@ export const api = {
       `/reports/${id}/assess-and-predict?planning_horizon_days=${horizonDays}&apply_vulnerability_buffer=${vulnBuffer}`,
       { method: "POST" }
     ),
+
+  // Weeks 5–6 Logistics Planning & Operations
+  runAllocation: (data: {
+    event_id?: string;
+    planning_horizon_days?: number;
+    distance_penalty_weight?: number;
+    enforce_accessibility?: boolean;
+    min_demand_fulfillment_ratio?: number;
+  }) =>
+    request<AllocationPlan>("/allocation/run", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  getAllocationPlans: (eventId?: string, limit: number = 10) => {
+    const q = new URLSearchParams();
+    if (eventId) q.set("event_id", eventId);
+    if (limit) q.set("limit", limit.toString());
+    const queryStr = q.toString() ? `?${q.toString()}` : "";
+    return request<AllocationPlan[]>(`/allocation/plans${queryStr}`);
+  },
+
+  autoCreateMissions: (planId: string) =>
+    request<ReliefMission[]>(`/allocation/plans/${planId}/create-missions`, {
+      method: "POST",
+    }),
+
+  getRoute: (params: {
+    origin_lat: number;
+    origin_lon: number;
+    dest_lat: number;
+    dest_lon: number;
+    road_accessibility?: number;
+  }) => {
+    const q = new URLSearchParams();
+    q.set("origin_lat", params.origin_lat.toString());
+    q.set("origin_lon", params.origin_lon.toString());
+    q.set("dest_lat", params.dest_lat.toString());
+    q.set("dest_lon", params.dest_lon.toString());
+    if (params.road_accessibility !== undefined) {
+      q.set("road_accessibility", params.road_accessibility.toString());
+    }
+    return request<any>(`/routing/route?${q.toString()}`);
+  },
+
+  getCorridors: () => request<any>("/routing/corridors"),
+
+  createOverride: (data: {
+    prediction_id: string;
+    overridden_urgency_score: number;
+    overridden_urgency_class: string;
+    justification: string;
+  }) =>
+    request<PriorityOverride>("/overrides", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  listOverrides: () => request<PriorityOverride[]>("/overrides"),
+
+  deleteOverride: (id: string) =>
+    request<{ status: string; message: string }>(`/overrides/${id}`, {
+      method: "DELETE",
+    }),
+
+  listMissions: (params?: { status?: string; depot_id?: string; limit?: number }) => {
+    const q = new URLSearchParams();
+    if (params?.status) q.set("status", params.status);
+    if (params?.depot_id) q.set("depot_id", params.depot_id);
+    if (params?.limit) q.set("limit", params.limit.toString());
+    const queryStr = q.toString() ? `?${q.toString()}` : "";
+    return request<ReliefMission[]>(`/missions${queryStr}`);
+  },
+
+  getMission: (id: string) => request<ReliefMission>(`/missions/${id}`),
+
+  updateMissionStatus: (id: string, data: { status: string; notes?: string }) =>
+    request<ReliefMission>(`/missions/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  getMissionTransactions: (id: string) =>
+    request<ResourceTransaction[]>(`/missions/${id}/transactions`),
+
+  getOperationsOverview: () => request<OperationsOverview>("/operations/overview"),
+
+  getSitRep: (eventId: string) => request<SituationReportData>(`/operations/sitrep/${eventId}`),
+
+  getSitRepMarkdownUrl: (eventId: string) => `${API_BASE}/operations/sitrep/${eventId}/markdown`,
 };
 

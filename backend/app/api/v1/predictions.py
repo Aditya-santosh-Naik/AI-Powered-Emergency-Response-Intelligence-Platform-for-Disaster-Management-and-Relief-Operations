@@ -1,5 +1,6 @@
 """Resource Demand Prediction API router (Weeks 3-4)."""
 
+import logging
 import os
 from datetime import UTC, datetime
 from pathlib import Path
@@ -7,6 +8,14 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import FileResponse
+from ml.config import (
+    EXCEL_WORKBOOK_PATH,
+    MODEL_VERSION,
+    TARGET_COLUMNS,
+)
+from ml.excel_generator import generate_excel_workbook
+from ml.inference import load_inference_artifacts, predict_zone_resource_demand
+from ml.scenario import simulate_zone_scenario
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,17 +34,9 @@ from app.services.prediction import (
     get_depot_inventory_totals,
     predict_event_resource_needs,
 )
-from ml.config import (
-    EXCEL_WORKBOOK_PATH,
-    MODEL_VERSION,
-    TARGET_COLUMNS,
-    TARGET_METADATA,
-)
-from ml.excel_generator import generate_excel_workbook
-from ml.inference import load_inference_artifacts, predict_zone_resource_demand
-from ml.scenario import simulate_zone_scenario
 
 router = APIRouter(prefix="/predictions", tags=["predictions"])
+logger = logging.getLogger(__name__)
 
 
 @router.get("/status", response_model=ModelStatusOut)

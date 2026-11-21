@@ -467,3 +467,169 @@ class DisasterReportAssessmentResponse(BaseModel):
     predictions: list[ZonePredictionOut]
 
 
+
+
+# ==============================================================================
+# WEEKS 5-6: LOGISTICS PLANNING, OPTIMIZATION & DISASTER OPERATIONS SCHEMAS
+# ==============================================================================
+
+class AllocationRunRequest(BaseModel):
+    event_id: UUID | None = None
+    planning_horizon_days: int = 3
+    distance_penalty_weight: float = 0.0001
+    enforce_accessibility: bool = True
+    min_demand_fulfillment_ratio: float = 0.0
+
+
+class AllocationDetailOut(BaseModel):
+    id: UUID
+    plan_id: UUID
+    depot_id: UUID
+    depot_name: str | None = None
+    depot_latitude: float | None = None
+    depot_longitude: float | None = None
+    prediction_id: UUID
+    zone_identifier: str | None = None
+    zone_latitude: float | None = None
+    zone_longitude: float | None = None
+    resource_type: str
+    allocated_quantity: int
+    demanded_quantity: int
+    shortage_quantity: int
+    distance_km: float | None = None
+    est_duration_hours: float | None = None
+    accessibility_status: str | None = "Accessible"
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class AllocationPlanOut(BaseModel):
+    id: UUID
+    event_id: UUID | None = None
+    solver_status: str
+    objective_value: float
+    total_demand_satisfied_pct: float
+    execution_time_ms: float
+    solver_parameters: dict[str, Any] | None = None
+    created_at: datetime
+    details: list[AllocationDetailOut] = []
+
+    model_config = {"from_attributes": True}
+
+
+class PriorityOverrideCreate(BaseModel):
+    prediction_id: UUID
+    overridden_urgency_score: float = Field(ge=0.0, le=100.0)
+    overridden_urgency_class: str
+    justification: str = Field(min_length=5)
+
+
+class PriorityOverrideOut(BaseModel):
+    id: UUID
+    prediction_id: UUID
+    zone_identifier: str | None = None
+    original_urgency_score: float
+    original_urgency_class: str
+    overridden_urgency_score: float
+    overridden_urgency_class: str
+    justification: str
+    authorized_by_id: UUID | None = None
+    authorized_by_name: str | None = None
+    is_active: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class ReliefMissionCreate(BaseModel):
+    plan_id: UUID | None = None
+    depot_id: UUID
+    prediction_id: UUID
+    vehicle_type: str = "Heavy Cargo Truck"
+    vehicle_identifier: str | None = None
+    team_leader: str | None = None
+    manifest: dict[str, int]
+    notes: str | None = None
+
+
+class ReliefMissionStatusUpdate(BaseModel):
+    status: str  # ASSIGNED, DISPATCHED, IN_TRANSIT, DELIVERED, COMPLETED, CANCELLED
+    notes: str | None = None
+
+
+class ReliefMissionOut(BaseModel):
+    id: UUID
+    mission_code: str
+    plan_id: UUID | None = None
+    depot_id: UUID
+    depot_name: str | None = None
+    prediction_id: UUID
+    zone_identifier: str | None = None
+    status: str
+    team_leader: str | None = None
+    vehicle_type: str
+    vehicle_identifier: str | None = None
+    manifest: dict[str, Any] | None = None
+    route_geojson: dict[str, Any] | None = None
+    distance_km: float | None = None
+    est_duration_hours: float | None = None
+    notes: str | None = None
+    dispatched_at: datetime | None = None
+    delivered_at: datetime | None = None
+    completed_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class ResourceTransactionOut(BaseModel):
+    id: UUID
+    depot_id: UUID
+    mission_id: UUID | None = None
+    resource_type: str
+    quantity: int
+    state_from: str
+    state_to: str
+    reference_note: str | None = None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class RouteLegOut(BaseModel):
+    depot_id: UUID
+    depot_name: str
+    depot_coords: list[float]  # [lat, lon]
+    zone_id: UUID
+    zone_identifier: str
+    zone_coords: list[float]   # [lat, lon]
+    distance_km: float
+    est_duration_hours: float
+    road_accessibility: float
+    accessibility_status: str  # Accessible, Restricted, Inaccessible
+    geojson: dict[str, Any]
+
+
+class SituationReportOut(BaseModel):
+    id: UUID
+    event_id: UUID
+    report_title: str
+    summary: str
+    metrics: dict[str, Any]
+    created_by_id: UUID | None = None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class OperationsOverviewOut(BaseModel):
+    active_alerts_count: int
+    critical_events_count: int
+    high_priority_zones_count: int
+    depots_active_count: int
+    total_stock: dict[str, int]
+    active_missions_count: int
+    gdacs_status: str
+    system_status: str

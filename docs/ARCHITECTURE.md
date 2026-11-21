@@ -243,4 +243,121 @@ erDiagram
         int quantity
         timestamp recorded_at
     }
+
+    allocation_plan {
+        uuid id PK
+        uuid event_id FK
+        string solver_status
+        float objective_value
+        float total_demand_satisfied_pct
+        float execution_time_ms
+        jsonb solver_parameters
+        timestamp created_at
+    }
+
+    allocation_detail {
+        uuid id PK
+        uuid plan_id FK
+        uuid depot_id FK
+        uuid prediction_id FK
+        string resource_type
+        int allocated_quantity
+        int demanded_quantity
+        int shortage_quantity
+        float distance_km
+        float est_duration_hours
+        string accessibility_status
+    }
+
+    priority_override {
+        uuid id PK
+        uuid prediction_id FK
+        float original_urgency_score
+        float overridden_urgency_score
+        string overridden_urgency_class
+        text justification
+        uuid authorized_by_id FK
+        boolean is_active
+    }
+
+    relief_mission {
+        uuid id PK
+        string mission_code
+        uuid plan_id FK
+        uuid depot_id FK
+        uuid prediction_id FK
+        string status
+        string team_leader
+        string vehicle_type
+        jsonb manifest
+        jsonb route_geojson
+        float distance_km
+        float est_duration_hours
+    }
+
+    situation_report {
+        uuid id PK
+        uuid event_id FK
+        string report_title
+        text summary
+        jsonb metrics
+        uuid created_by_id FK
+    }
 ```
+
+---
+
+## 7. Google OR-Tools MILP Allocation Engine (Weeks 5–6)
+
+The resource allocation engine (`app/services/allocation.py`) formulates a Mixed-Integer Linear Programming (MILP) model solved using the SCIP optimizer.
+
+### Mathematical Formulation:
+
+Let $D$ be the set of active depots, $Z$ be the set of impacted disaster sectors, and $R$ be the set of critical relief commodities:
+$$R = \{\text{food\_packets}, \text{water}, \text{medical\_kits}, \text{shelter\_spaces}\}$$
+
+Let $x_{d,z,r} \ge 0$ denote the integer quantity of resource $r$ allocated from depot $d$ to zone $z$.
+
+#### Objective Function:
+$$\max \sum_{z \in Z} \sum_{d \in D} \sum_{r \in R} \left( W_r \cdot U_z - \lambda \cdot \frac{\text{dist}(d,z)}{1000 \cdot A_z} \right) \cdot x_{d,z,r}$$
+Where:
+- $W_r$: Criticality weight of resource $r$ (Medical = 1.5, Water = 1.4, Food = 1.2, Shelter = 1.0)
+- $U_z$: Zone urgency factor derived from ML model or elevated by commander priority override ($U_z = \text{urgency\_score} / 50.0$)
+- $\lambda$: Haulage penalty coefficient (default $10^{-4}$)
+- $\text{dist}(d,z)$: Road corridor distance in kilometers
+- $A_z$: Road accessibility index ($A_z \in [0.1, 1.0]$)
+
+#### Operational Constraints:
+1. **Depot Inventory Capacity**:
+   $$\sum_{z \in Z} x_{d,z,r} \le \text{Stock}_{d,r} \quad \forall d \in D, \forall r \in R$$
+2. **Zone Demand Cap**:
+   $$\sum_{d \in D} x_{d,z,r} \le \text{Demand}_{z,r} \quad \forall z \in Z, \forall r \in R$$
+3. **Accessibility Threshold**:
+   $$\text{If } A_z < 0.20 \text{ and enforce\_accessibility = True} \implies x_{d,z,r} = 0$$
+
+---
+
+## 8. NetworkX Logistics Routing Engine
+
+The routing service (`app/services/routing.py`) maintains an embedded topological graph of 28 strategic National Highway trunk hubs across India:
+- **Corridor Nodes**: Strategic logistic nodes (Delhi, Mumbai, Bengaluru, Chennai, Kolkata, Guwahati, Nagpur, Kochi, Bhopal, Ahmedabad, etc.).
+- **Edge Weights**: Great-circle Haversine distances scaled by a $1.20$ highway curvature factor.
+- **Duration Calculation**:
+  $$\text{Effective Speed} = \begin{cases} 45.0 \cdot (0.5 + 0.5 \cdot A_z) \text{ km/h} & \text{if } A_z \ge 0.30 \\ 18.0 \text{ km/h} & \text{if Restricted/Severed} \end{cases}$$
+- **GeoJSON Output**: Polyline coordinates formatted as standard GeoJSON LineStrings for interactive map rendering.
+
+---
+
+## 9. Relief Mission State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> ASSIGNED: Auto-created from Allocation Plan
+    ASSIGNED --> DISPATCHED: Convoy manifests verified & stock reserved
+    DISPATCHED --> IN_TRANSIT: Departed logistics depot
+    IN_TRANSIT --> DELIVERED: Reached disaster sector staging point
+    DELIVERED --> COMPLETED: Distribution confirmed & inventory balance deducted
+    ASSIGNED --> CANCELLED: Mission aborted by commander
+    DISPATCHED --> CANCELLED: Recalled due to severed route
+```
+

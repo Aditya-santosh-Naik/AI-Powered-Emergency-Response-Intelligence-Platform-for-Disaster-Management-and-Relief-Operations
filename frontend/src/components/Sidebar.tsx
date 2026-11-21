@@ -17,6 +17,9 @@ import {
   X,
   Sliders,
   CheckCircle2,
+  Cpu,
+  Truck,
+  FileText,
 } from "lucide-react";
 import { api } from "../api/client";
 import { useTheme } from "../context/ThemeContext";
@@ -41,6 +44,9 @@ export const Sidebar: React.FC = () => {
     { to: "/", label: "Disaster Map", icon: MapPin },
     { to: "/events", label: "Events", icon: AlertTriangle, badge: events.length > 0 ? (events.length > 99 ? "99+" : events.length.toString()) : "12" },
     { to: "/predictions", label: "Resource Demand", icon: Sparkles },
+    { to: "/command", label: "Command Center", icon: Cpu },
+    { to: "/missions", label: "Missions", icon: Truck },
+    { to: "/sitrep", label: "Situation Reports", icon: FileText },
     { to: "/inventory", label: "Inventory", icon: Boxes },
     { to: "/donors", label: "Donors", icon: HeartHandshake },
     { to: "/report", label: "Report Incident", icon: AlertCircle },

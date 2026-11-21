@@ -15,14 +15,15 @@ Tests A through I verify:
 import os
 import random
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
+
 import openpyxl
 import pytest
+from ml.config import EXCEL_WORKBOOK_PATH, TARGET_COLUMNS
+from ml.inference import predict_zone_resource_demand
 from starlette.testclient import TestClient
 
 from app.services.prediction import calculate_resource_shortage
-from ml.config import EXCEL_WORKBOOK_PATH, TARGET_COLUMNS
-from ml.inference import predict_zone_resource_demand
 
 
 @pytest.fixture

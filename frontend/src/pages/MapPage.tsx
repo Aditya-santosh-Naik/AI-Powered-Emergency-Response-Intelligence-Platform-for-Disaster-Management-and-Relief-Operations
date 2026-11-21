@@ -7,6 +7,7 @@ import {
   Polygon,
   Popup,
   Marker,
+  Polyline,
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
@@ -47,6 +48,14 @@ L.Icon.Default.mergeOptions({
 const depotIcon = new L.DivIcon({
   className: "custom-depot-marker",
   html: `<div style="background: rgba(37, 99, 235, 0.95); width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ffffff; border: 2px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/><path d="M6 18h12"/><path d="M6 14h12"/></svg></div>`,
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+});
+
+// Custom field team / convoy icon
+const convoyIcon = new L.DivIcon({
+  className: "custom-convoy-marker",
+  html: `<div style="background: rgba(16, 185, 129, 0.95); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ffffff; border: 2px solid #ffffff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg></div>`,
   iconSize: [28, 28],
   iconAnchor: [14, 14],
 });
@@ -96,6 +105,8 @@ export const MapPage: React.FC = () => {
   const [showFootprints, setShowFootprints] = useState(true);
   const [showGrid, setShowGrid] = useState(true);
   const [showDepots, setShowDepots] = useState(true);
+  const [showRoutes, setShowRoutes] = useState(true);
+  const [showFieldTeams, setShowFieldTeams] = useState(true);
   const [basemap, setBasemap] = useState<"osm" | "dark" | "satellite">(theme === "light" ? "osm" : "dark");
   const [locationSearch, setLocationSearch] = useState("India");
 
@@ -112,6 +123,11 @@ export const MapPage: React.FC = () => {
   const { data: depots = [] } = useQuery({
     queryKey: ["depots"],
     queryFn: api.getDepots,
+  });
+
+  const { data: missions = [] } = useQuery({
+    queryKey: ["missions"],
+    queryFn: () => api.listMissions({ limit: 50 }),
   });
 
   const { data: gridCells = [] } = useQuery({
@@ -651,6 +667,90 @@ export const MapPage: React.FC = () => {
                   </Marker>
                 ))}
 
+              {/* Mission Delivery Routes */}
+              {showRoutes &&
+                missions.map((m) => {
+                  if (!m.route_geojson || !m.route_geojson.coordinates) return null;
+                  const coords = m.route_geojson.coordinates.map((c: any) => [c[1], c[0]] as [number, number]);
+                  if (coords.length < 2) return null;
+                  const isDelivered = m.status === "DELIVERED" || m.status === "COMPLETED";
+                  return (
+                    <Polyline
+                      key={`route-${m.id}`}
+                      positions={coords}
+                      pathOptions={{
+                        color: isDelivered ? "#10B981" : "#3B82F6",
+                        weight: 3.5,
+                        dashArray: m.status === "IN_TRANSIT" ? "6, 8" : undefined,
+                        opacity: 0.85,
+                      }}
+                    >
+                      <Popup>
+                        <div className="p-1 space-y-1 text-xs font-sans">
+                          <div className="font-bold text-text-primary flex items-center space-x-1">
+                            <Truck className="w-3.5 h-3.5 text-blue-500" />
+                            <span>Mission: {m.mission_code || m.id.slice(0, 8)}</span>
+                          </div>
+                          <div className="text-[11px] text-text-secondary">
+                            Status: <span className="font-semibold uppercase text-blue-600 dark:text-sky-400">{m.status}</span>
+                          </div>
+                          <div className="text-[11px] text-text-secondary">
+                            Leader: {m.team_leader || "Dispatched Team"}
+                          </div>
+                          {m.distance_km && (
+                            <div className="text-[11px] text-text-secondary">
+                              Distance: {m.distance_km.toFixed(1)} km
+                            </div>
+                          )}
+                        </div>
+                      </Popup>
+                    </Polyline>
+                  );
+                })}
+
+              {/* Field Teams Convoy Tracking Markers */}
+              {showFieldTeams &&
+                missions
+                  .filter((m) => m.status === "IN_TRANSIT" || m.status === "DISPATCHED" || m.status === "DELIVERED")
+                  .map((m) => {
+                    let lat = 0;
+                    let lng = 0;
+                    if (m.route_geojson && m.route_geojson.coordinates && m.route_geojson.coordinates.length > 0) {
+                      const coords = m.route_geojson.coordinates;
+                      const idx =
+                        m.status === "IN_TRANSIT"
+                          ? Math.floor(coords.length / 2)
+                          : m.status === "DISPATCHED"
+                          ? 0
+                          : coords.length - 1;
+                      lng = coords[idx][0];
+                      lat = coords[idx][1];
+                    }
+                    if (!lat || !lng || lat < 6.0 || lat > 38.0 || lng < 65.0 || lng > 98.5) return null;
+
+                    return (
+                      <Marker key={`convoy-${m.id}`} position={[lat, lng]} icon={convoyIcon}>
+                        <Popup>
+                          <div className="p-1.5 space-y-1 text-xs font-sans">
+                            <div className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center space-x-1">
+                              <Truck className="w-3.5 h-3.5" />
+                              <span>Convoy {m.mission_code || m.id.slice(0, 8)}</span>
+                            </div>
+                            <div className="text-[11px] text-text-secondary">
+                              Status: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{m.status}</span>
+                            </div>
+                            <div className="text-[11px] text-text-secondary">
+                              Leader: {m.team_leader || "Rapid Response Team"}
+                            </div>
+                            <div className="text-[11px] text-text-secondary">
+                              Vehicle: {m.vehicle_identifier || m.vehicle_type || "Relief Transport"}
+                            </div>
+                          </div>
+                        </Popup>
+                      </Marker>
+                    );
+                  })}
+
               {/* Disaster Incident Markers */}
               {showEvents &&
                 indiaEvents.map((ev) => {
@@ -754,6 +854,24 @@ export const MapPage: React.FC = () => {
                     className="rounded bg-surface-2 border-border-strong text-blue-600 focus:ring-0"
                   />
                   <span>Events</span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer hover:text-text-primary">
+                  <input
+                    type="checkbox"
+                    checked={showRoutes}
+                    onChange={(e) => setShowRoutes(e.target.checked)}
+                    className="rounded bg-surface-2 border-border-strong text-blue-600 focus:ring-0"
+                  />
+                  <span>Delivery Routes</span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer hover:text-text-primary">
+                  <input
+                    type="checkbox"
+                    checked={showFieldTeams}
+                    onChange={(e) => setShowFieldTeams(e.target.checked)}
+                    className="rounded bg-surface-2 border-border-strong text-blue-600 focus:ring-0"
+                  />
+                  <span>Field Teams</span>
                 </label>
               </div>
             </div>

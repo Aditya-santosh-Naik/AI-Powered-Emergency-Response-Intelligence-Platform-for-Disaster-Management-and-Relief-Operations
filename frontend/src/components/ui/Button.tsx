@@ -44,6 +44,7 @@ export const Button: React.FC<ButtonProps> = ({
     <button
       disabled={disabled || loading}
       className={`${base} ${sizeStyles} ${variantStyles} ${className}`}
+      aria-label={props["aria-label"] || (typeof children === "string" ? children : undefined)}
       {...props}
     >
       {loading ? (

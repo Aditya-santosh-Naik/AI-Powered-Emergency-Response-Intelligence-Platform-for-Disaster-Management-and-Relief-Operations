@@ -10,8 +10,11 @@ from starlette.testclient import TestClient
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
+# Ensure tests use the local SQLite database
+db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "emergency_response.db")).replace("\\", "/")
+os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{db_path}"
 
-from app.main import app
+from app.main import app  # noqa: E402
 
 
 @pytest.fixture

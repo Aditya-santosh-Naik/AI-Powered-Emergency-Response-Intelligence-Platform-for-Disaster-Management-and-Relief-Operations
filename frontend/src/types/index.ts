@@ -337,3 +337,149 @@ export interface DisasterReportAssessmentResponse {
   predictions: ZonePrediction[];
 }
 
+// -- Weeks 5-6 Logistics & Allocation Types --
+
+export interface AllocationDetail {
+  id: string;
+  plan_id?: string;
+  depot_id?: string;
+  depot_name?: string;
+  depot_latitude?: number;
+  depot_longitude?: number;
+  prediction_id?: string;
+  zone_identifier?: string;
+  zone_id?: string;
+  zone_label?: string;
+  resource_type: string;
+  allocated_quantity?: number;
+  allocated_qty?: number;
+  demanded_quantity?: number;
+  shortage_quantity?: number;
+  distance_km?: number;
+  est_duration_hours?: number;
+  accessibility_status?: string;
+  priority_score?: number;
+  source_depot_id?: string;
+  source_depot_name?: string;
+  created_at?: string;
+}
+
+export interface AllocationPlan {
+  id: string;
+  event_id?: string;
+  solver_status?: string;
+  objective_value?: number;
+  total_demand_satisfied_pct?: number;
+  execution_time_ms?: number;
+  solver_parameters?: Record<string, any>;
+  horizon_hours?: number;
+  total_items_allocated?: number;
+  zones_covered?: number;
+  depots_used?: number;
+  status?: string;
+  created_at: string;
+  details: AllocationDetail[];
+}
+
+export interface PriorityOverride {
+  id: string;
+  prediction_id?: string;
+  event_id?: string;
+  zone_identifier?: string;
+  zone_id?: string;
+  resource_type?: string;
+  original_urgency_score?: number;
+  original_urgency_class?: string;
+  overridden_urgency_score?: number;
+  overridden_urgency_class?: string;
+  override_factor?: number;
+  justification?: string;
+  reason?: string;
+  authorized_by_id?: string;
+  authorized_by_name?: string;
+  created_by?: string;
+  is_active?: boolean;
+  created_at: string;
+}
+
+export interface ResourceTransaction {
+  id: string;
+  depot_id?: string;
+  mission_id?: string;
+  resource_type: string;
+  resource_type_name?: string;
+  quantity: number;
+  unit?: string;
+  state_from?: string;
+  state_to?: string;
+  reference_note?: string;
+  source_depot_id?: string;
+  source_depot_name?: string;
+  destination_zone_id?: string;
+  created_at: string;
+}
+
+export interface ReliefMission {
+  id: string;
+  mission_code?: string;
+  label?: string;
+  plan_id?: string;
+  allocation_plan_id?: string;
+  event_id?: string;
+  depot_id?: string;
+  depot_name?: string;
+  source_depot_id?: string;
+  source_depot_name?: string;
+  prediction_id?: string;
+  zone_identifier?: string;
+  destination_zone_id?: string;
+  destination_label?: string;
+  status: "ASSIGNED" | "DISPATCHED" | "IN_TRANSIT" | "DELIVERED" | "COMPLETED" | "CANCELLED" | string;
+  team_leader?: string;
+  vehicle_type?: string;
+  vehicle_identifier?: string;
+  manifest?: Record<string, any>;
+  route_geojson?: any;
+  route_geometry?: GeoJSONGeometry;
+  distance_km?: number;
+  est_duration_hours?: number;
+  eta_minutes?: number;
+  notes?: string;
+  items?: ResourceTransaction[];
+  dispatched_at?: string;
+  delivered_at?: string;
+  completed_at?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface OperationsOverview {
+  active_alerts_count: number;
+  critical_events_count: number;
+  high_priority_zones_count: number;
+  depots_active_count: number;
+  total_stock: Record<string, number>;
+  active_missions_count: number;
+  gdacs_status: string;
+  system_status: string;
+  // Legacy / fallback fields
+  active_events?: number;
+  total_allocations?: number;
+  missions_in_transit?: number;
+  missions_delivered?: number;
+  total_items_dispatched?: number;
+  zones_covered?: number;
+}
+
+export interface SituationReportData {
+  id: string;
+  event_id: string;
+  report_title?: string;
+  markdown_report?: string;
+  summary?: string;
+  markdown?: string;
+  metrics: Record<string, any>;
+  created_at?: string;
+  generated_at?: string;
+}
+

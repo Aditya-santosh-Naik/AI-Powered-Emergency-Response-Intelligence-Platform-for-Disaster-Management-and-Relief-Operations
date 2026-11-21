@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
@@ -38,7 +40,15 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> str:
         if self.database_url_override:
-            return self.database_url_override
+            url = self.database_url_override
+            if url.startswith("sqlite+aiosqlite:///"):
+                raw_path = url[len("sqlite+aiosqlite:///"):]
+                if not (len(raw_path) > 2 and raw_path[1] == ":" or raw_path.startswith("/")):
+                    backend_dir = Path(__file__).resolve().parent.parent
+                    parent_candidate = backend_dir.parent / raw_path
+                    if parent_candidate.exists():
+                        return f"sqlite+aiosqlite:///{parent_candidate.as_posix()}"
+            return url
         return (
             f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
@@ -47,9 +57,10 @@ class Settings(BaseSettings):
     @property
     def sync_database_url(self) -> str:
         """For Alembic and sync seed scripts."""
+        url = self.database_url
+        if "sqlite+aiosqlite" in url:
+            return url.replace("sqlite+aiosqlite", "sqlite")
         if self.database_url_override:
-            if "sqlite+aiosqlite" in self.database_url_override:
-                return self.database_url_override.replace("sqlite+aiosqlite", "sqlite")
             return self.database_url_override
         return (
             f"postgresql://{self.postgres_user}:{self.postgres_password}"

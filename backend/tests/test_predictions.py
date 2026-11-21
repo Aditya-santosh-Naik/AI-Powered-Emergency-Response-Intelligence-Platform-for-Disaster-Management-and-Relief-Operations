@@ -1,6 +1,5 @@
 """Tests for Weeks 3-4 Resource Demand Prediction Engine."""
 
-import pytest
 from starlette.testclient import TestClient
 
 

@@ -498,8 +498,76 @@ async def seed_database() -> None:
                     session.add(rep_obj)
             logger.info("Sample citizen disaster reports seeded for review workflow.")
 
+            # Seed Historical Disaster Datasets (Kerala 2018, Chennai 2015)
+            await seed_kerala_floods_2018(session)
+            await seed_chennai_floods_2015(session)
+
         await session.commit()
         logger.info("Database seeding completed successfully.")
+
+
+async def seed_kerala_floods_2018(session):
+    """Seed historical dataset: 2018 Great Kerala Monsoon Floods."""
+    external_id = "HIST-KERALA-2018-FLOODS"
+    res = await session.execute(
+        select(DisasterEvent).where(DisasterEvent.external_id == external_id)
+    )
+    if res.scalar_one_or_none():
+        return
+
+    point_wkt = Point(76.2711, 10.8505).wkt
+    event = DisasterEvent(
+        source="NDMA_HISTORICAL",
+        external_id=external_id,
+        event_type="flood",
+        title="2018 Kerala Floods (Historical Benchmark)",
+        description="Historic monsoon flood event affecting 14 districts across Kerala. Extreme precipitation led to opening of 35 dams.",
+        geometry=point_wkt,
+        magnitude=0.85,
+        alert_level="Red",
+        country="India",
+        started_at=datetime(2018, 8, 8, 6, 0, tzinfo=UTC),
+        ended_at=datetime(2018, 8, 25, 18, 0, tzinfo=UTC),
+        is_sample=True,
+    )
+    session.add(event)
+    await session.flush()
+
+    # Generate impact zone
+    await assess_event_impact(event, session)
+    logger.info("Seeded historical scenario: 2018 Kerala Floods.")
+
+
+async def seed_chennai_floods_2015(session):
+    """Seed historical dataset: 2015 Chennai Urban Deluge."""
+    external_id = "HIST-CHENNAI-2015-FLOODS"
+    res = await session.execute(
+        select(DisasterEvent).where(DisasterEvent.external_id == external_id)
+    )
+    if res.scalar_one_or_none():
+        return
+
+    point_wkt = Point(80.2707, 13.0827).wkt
+    event = DisasterEvent(
+        source="NDMA_HISTORICAL",
+        external_id=external_id,
+        event_type="flood",
+        title="2015 Chennai Deluge (Historical Benchmark)",
+        description="Catastrophic urban flooding in Chennai Metropolitan Region due to deep depression over Bay of Bengal.",
+        geometry=point_wkt,
+        magnitude=0.75,
+        alert_level="Red",
+        country="India",
+        started_at=datetime(2015, 11, 30, 12, 0, tzinfo=UTC),
+        ended_at=datetime(2015, 12, 10, 18, 0, tzinfo=UTC),
+        is_sample=True,
+    )
+    session.add(event)
+    await session.flush()
+
+    # Generate impact zone
+    await assess_event_impact(event, session)
+    logger.info("Seeded historical scenario: 2015 Chennai Floods.")
 
 
 
