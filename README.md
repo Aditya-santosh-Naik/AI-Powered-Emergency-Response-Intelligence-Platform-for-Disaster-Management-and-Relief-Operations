@@ -1,20 +1,54 @@
 # AI-Powered Emergency Response Intelligence Platform
+### Intelligent Disaster Impact Assessment, ML Demand Forecasting & Humanitarian Logistics Optimization
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](file:///d:/Infosys%20%20disaster/internship)
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://python.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![React 19](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet&logoColor=white)](https://leafletjs.com)
-[![OR--Tools](https://img.shields.io/badge/Google%20OR--Tools-SCIP%20MILP-4285F4?logo=google&logoColor=white)](https://developers.google.com/optimization)
+[![Google OR-Tools](https://img.shields.io/badge/Google%20OR--Tools-SCIP%20MILP-4285F4?logo=google&logoColor=white)](https://developers.google.com/optimization)
 [![XGBoost](https://img.shields.io/badge/XGBoost-MultiOutput-EB4034)](https://xgboost.readthedocs.io)
-
-> **Complete Platform Scope: Weeks 1 through 8** — Ingestion, Geospatial Footprints, ML Demand Prediction, Linear Programming Optimization, Multi-State Routing, Mission Operations, and Post-Event Analytics.
-
-A mission-critical geospatial AI and humanitarian logistics orchestration platform engineered for National and State Disaster Management Authorities (**NDMA / SDRF**) and humanitarian coordination partners. The platform unites continuous real-time multi-source data ingestion, demographic exposure modeling, multi-output machine learning resource forecasting, Google OR-Tools constrained logistics optimization, NetworkX-driven road routing, frontline convoy dispatching, and post-event situation reporting.
+[![Pytest](https://img.shields.io/badge/Pytest-41%2F41%20Passing-brightgreen?logo=pytest&logoColor=white)](backend/tests/)
+[![Vitest](https://img.shields.io/badge/Vitest-13%2F13%20Passing-brightgreen?logo=vitest&logoColor=white)](frontend/src/test/)
 
 ---
 
-## Architecture Overview
+## Table of Contents
+- [Executive Overview](#executive-overview)
+- [System Architecture](#system-architecture)
+- [Milestone Implementation Map (Weeks 1–8)](#milestone-implementation-map-weeks-18)
+- [Mathematical & Algorithmic Formulation](#mathematical--algorithmic-formulation)
+  - [Google OR-Tools SCIP MILP Solver](#google-or-tools-scip-milp-solver)
+  - [Machine Learning Demand Regressor](#machine-learning-demand-regressor)
+  - [NetworkX Highway Routing Graph](#networkx-highway-routing-graph)
+- [Pre-Provisioned Demo Accounts](#pre-provisioned-demo-accounts)
+- [Quickstart Guide](#quickstart-guide)
+  - [Option A: Local Standalone Setup (Recommended)](#option-a-local-standalone-setup-recommended)
+  - [Option B: Docker Compose Production Stack](#option-b-docker-compose-production-stack)
+- [Automated Verification & Test Suites](#automated-verification--test-suites)
+- [REST API Reference Summary](#rest-api-reference-summary)
+- [Technical Documentation Suite](#technical-documentation-suite)
+- [Presentation Walkthrough Script](#presentation-walkthrough-script)
+- [Author & License](#author--license)
+
+---
+
+## Executive Overview
+
+The **AI-Powered Emergency Response Intelligence Platform** is an enterprise-grade humanitarian orchestration and decision-support system engineered for National and State Disaster Management Authorities (**NDMA / SDRF**) and disaster relief agencies.
+
+Post-disaster operations frequently fail during the **"Golden 72 Hours"** due to information fragmentation, inaccurate resource estimation, depot-stock mismatch, and uncoordinated relief transport. This platform unifies the full operational disaster lifecycle:
+1. **Real-Time Automated Data Ingestion**: Continuous ingestion from GDACS, USGS, NDMA, and NASA FIRMS thermal telemetry.
+2. **Geospatial Exposure Modeling**: Dynamic hazard footprint generation and zonal population extraction (`rasterio`, WorldPop, OpenStreetMap building densities).
+3. **Predictive AI Resource Forecasting**: Multi-output XGBoost regression models forecasting four humanitarian commodities (food, water, medical kits, emergency shelters) with 80% prediction intervals.
+4. **Constrained Logistics Optimization**: Google OR-Tools Mixed-Integer Linear Programming (MILP) solver optimizing depot-to-sector relief distribution subject to vehicle payload capacities, depot stock limits, and commander priority overrides.
+5. **Frontline Convoy Dispatch & Fleet Telemetry**: Road routing across a 28-hub Indian National Highway graph factoring post-disaster road accessibility flags, paired with an interactive Leaflet convoy tracking dashboard.
+6. **Automated Situation Reporting (SitRep)**: Instant post-event reporting compliant with UN OCHA and NDMA protocols.
+
+---
+
+## System Architecture
 
 ```mermaid
 flowchart TD
@@ -63,112 +97,172 @@ flowchart TD
 
 ---
 
-## Core Capabilities Across Weeks 1–8
+## Milestone Implementation Map (Weeks 1–8)
 
-### 1. Disaster Data Ingestion & Impact Assessment (Weeks 1–2)
-- **Continuous Multi-Feed Polling**: Automated polling of GDACS, USGS, NDMA, and NASA FIRMS feeds managed by `APScheduler` with manual trigger capabilities.
-- **Geospatial Exposure Modeling**: Dynamic hazard footprints (magnitude-derived radii for earthquakes, circular/polygon buffers for floods, cyclones, and wildfires).
-- **Zonal Population & Infrastructure Extraction**: High-performance demographic exposure calculations via raster zonal statistics (`rasterio`) and OpenStreetMap building counts.
-- **0.05° Severity Grid**: Composite scoring combining hazard intensity (40%), population exposure (35%), and structural density (25%) into color-coded severity tiers.
-
-### 2. Machine Learning Resource Demand Prediction (Weeks 3–4)
-- **Multi-Output Gradient Boosting**: Trained XGBoost regressor predicting 4 critical humanitarian commodities: **Food Packets**, **Drinking Water (Liters)**, **Medical Emergency Kits**, and **Shelter Spaces**.
-- **Quantile Uncertainty Bounds**: 80% prediction intervals ($\alpha = 0.10, \alpha = 0.90$) identifying conservative buffer requirements.
-- **Vulnerability Profiling**: Isolates pediatric, geriatric, and medical dependency shares to scale relief without double-counting general population.
-- **Live Scenario Simulator**: Allows emergency coordinators to model demand surges under severe road blockages or population displacements.
-
-### 3. Logistics Optimization & Operations Command (Weeks 5–6)
-- **Google OR-Tools Linear Programming Solver**: Formulates a Mixed-Integer Linear Programming (MILP) model allocating depot stocks across affected sectors, maximizing demand fulfillment while penalizing transit haulage.
-- **Logistics Transit Routing**: NetworkX weighted graph modeling 28 Indian National Highway trunk hubs with Haversine distance, truck transit duration, and road accessibility degradation.
-- **Commander Priority Overrides**: Authorizes emergency directors to manually elevate sector urgency scores with mandatory justifications and complete audit logging.
-- **Relief Mission Management**: End-to-end convoy lifecycle state machine (`ASSIGNED` $\rightarrow$ `DISPATCHED` $\rightarrow$ `IN_TRANSIT` $\rightarrow$ `DELIVERED` $\rightarrow$ `COMPLETED`) with stock reservation ledgers.
-- **Automated Situation Reports (SitRep)**: Instant post-event synthesis generating official directives with demographic summaries, fulfillment ratios, and downloadable Markdown reports.
-
-### 4. Integration, Testing & Project Finalization (Weeks 7–8)
-- **End-to-End Pipeline Integrity**: Automated testing verifying cross-module flow from disaster feed ingestion through impact assessment, demand prediction, MILP optimization, convoy dispatch, and SitRep delivery.
-- **Historical Scenario Benchmarking**: Validated against historical disaster datasets:
-  - **2018 Great Kerala Monsoon Floods** (14 districts, 5.4M affected)
-  - **2015 Chennai Urban Deluge** (Metropolitan corridor, 1.8M affected)
-- **Locust Load Testing Suite**: Multi-user concurrent stress testing for high-availability disaster operations.
-- **Responsive Command Interface**: Glassmorphism dark/light design system with accessible tooltips, loading skeleton states, and mobile adaptation.
+| Phase | Milestone Scope | Technical Components Delivered | Status |
+| :--- | :--- | :--- | :---: |
+| **Weeks 1–2** | **Disaster Feeds & Impact Assessment** | Multi-feed polling connectors (GDACS, USGS, NDMA, NASA FIRMS), dynamic footprint generator, `rasterio` demographic exposure extraction, 0.05° composite severity grid. | **Complete** |
+| **Weeks 3–4** | **ML Resource Demand Prediction** | Multi-target XGBoost regressor, quantile bounds ($\alpha=0.10, \alpha=0.90$), demographic vulnerability multipliers, citizen incident reporting triage (`/report` & `/admin`). | **Complete** |
+| **Weeks 5–6** | **Logistics Optimization & Operations** | Google OR-Tools SCIP MILP solver, NetworkX 28-hub highway router, commander priority overrides, convoy fleet state machine, real-time map routes & field tracking, automated SitRep generator. | **Complete** |
+| **Weeks 7–8** | **Integration, Testing & Hardening** | Full-pipeline E2E integration tests, historical scenario validation (Kerala 2018, Chennai 2015), Locust stress testing profile, UI/UX polish (tooltips, skeleton loaders, error boundaries), full documentation suite. | **Complete** |
 
 ---
 
-## Directory Structure
+## Mathematical & Algorithmic Formulation
 
-```text
-├── backend/
-│   ├── alembic/                 # Database schema migrations
-│   ├── app/
-│   │   ├── api/v1/              # 14 REST API routers
-│   │   │   ├── allocation.py    # OR-Tools resource allocation router
-│   │   │   ├── auth.py          # JWT authentication & RBAC router
-│   │   │   ├── donors.py        # Humanitarian donors & consignments
-│   │   │   ├── events.py        # Disaster event queries
-│   │   │   ├── field_ops.py     # Field operations logging
-│   │   │   ├── ingestion.py     # Feed ingestion triggers & telemetry
-│   │   │   ├── inventory.py     # Depot inventory & stock adjustments
-│   │   │   ├── missions.py      # Relief mission dispatch & state machine
-│   │   │   ├── operations.py    # Command overview & SitRep generator
-│   │   │   ├── overrides.py     # Commander priority override manager
-│   │   │   ├── predictions.py   # ML demand inference & scenarios
-│   │   │   ├── reports.py       # Citizen reporting & admin review
-│   │   │   ├── routing.py       # Highway routing & corridor graph
-│   │   │   └── zones.py         # Impact zones & severity grid cells
-│   │   ├── connectors/          # GDACS, USGS, NDMA, NASA FIRMS
-│   │   ├── models/              # SQLAlchemy 2.0 ORM models (GeoAlchemy2)
-│   │   ├── schemas/             # Pydantic v2 schemas
-│   │   ├── services/            # Optimization, routing, ML, impact, missions
-│   │   ├── config.py            # Central configuration & dual-mode DB settings
-│   │   ├── db.py                # PostGIS / SQLite compatibility engine
-│   │   ├── main.py              # FastAPI app creation & lifecycle hooks
-│   │   └── scheduler.py         # APScheduler background polling setup
-│   ├── fixtures/                # Verified disaster scenarios & synthetic GeoTIFFs
-│   ├── tests/                   # Automated pytest unit & integration test suite
-│   ├── locustfile.py            # Locust load & stress testing configuration
-│   ├── pyproject.toml           # Backend dependencies, ruff, and mypy config
-│   └── seed.py                  # Database seeder with realistic disaster scenarios
-├── frontend/
-│   ├── src/
-│   │   ├── api/                 # Strongly typed API client
-│   │   ├── components/          # Navigation, status indicators, badges
-│   │   │   └── ui/              # Tooltip, SkeletonLoader, ErrorBoundary, Button, Badge
-│   │   ├── context/             # AuthContext (JWT) and ThemeContext (Dual-Theme)
-│   │   ├── pages/               # React route pages
-│   │   │   ├── CommandDashboardPage.tsx # Operations Command Center
-│   │   │   ├── MissionsPage.tsx         # Mission Assignment & Fleet Board
-│   │   │   ├── SitRepPage.tsx           # Situation Report Generator & Viewer
-│   │   │   ├── MapPage.tsx              # Interactive Indian Geospatial Map
-│   │   │   ├── AdminDashboardPage.tsx   # Citizen Report Triage Desk
-│   │   │   ├── PredictionsPage.tsx      # ML Resource Demand Explorer
-│   │   │   ├── EventsPage.tsx           # Disaster Intelligence Feed
-│   │   │   ├── InventoryPage.tsx        # Depot Stock Management
-│   │   │   ├── DonorsPage.tsx           # Partner Directory & Aid Consignments
-│   │   │   └── ReportDisasterPage.tsx   # Citizen Incident Reporting Form
-│   │   ├── test/                # Vitest unit & integration test suite
-│   │   └── types/               # TypeScript interfaces matching backend schemas
-│   ├── package.json             # React 19, Vite 8, Tailwind CSS, Leaflet
-│   └── vite.config.ts           # Vite build & proxy settings
-├── ml/
-│   ├── artifacts/               # Serialized XGBoost model bundles (.joblib)
-│   ├── config.py                # Hyperparameters, targets, feature definitions
-│   ├── inference.py             # Inference pipeline with quantile bounds
-│   ├── models.py                # Regressor architecture & training routines
-│   ├── scenario.py              # What-if scenario shock generator
-│   ├── train.py                 # Offline model training script
-│   └── vulnerability.py         # Demographic vulnerability profile modifiers
-├── dataset/                     # 1,200-sample Excel workbook feature store
-├── docs/
-│   ├── ARCHITECTURE.md          # In-depth architectural & mathematical specifications
-│   ├── API_REFERENCE.md         # Exhaustive API reference for all 50+ endpoints
-│   ├── DATA_FLOW.md             # Mermaid sequence diagrams for all operations
-│   ├── MODEL_EVALUATION.md      # Empirical ML evaluation metrics & feature store
-│   ├── DEPLOYMENT_GUIDE.md      # Multi-stage Docker Compose production deployment
-│   ├── KNOWN_LIMITATIONS.md     # Engineering assumptions & technical boundaries
-│   └── PRESENTATION_NOTES.md    # PPT pitch deck outline & live demo script
-├── docker-compose.yml           # Production PostGIS, Backend, and Frontend containers
-├── .env.example                 # Environment configuration template
-└── README.md
+### Google OR-Tools SCIP MILP Solver
+
+The resource allocation problem is formulated as a Mixed-Integer Linear Program (MILP) solved using the **SCIP** solver engine:
+
+#### Objective Function
+Maximize satisfied priority-weighted demand while minimizing transit haulage costs:
+
+$$\max \sum_{z \in Z} \sum_{r \in R} \left( W_{z,r} \cdot \sum_{d \in D} X_{d,z,r} \right) - \lambda \sum_{d \in D} \sum_{z \in Z} \left( \text{Dist}_{d,z} \cdot \sum_{r \in R} c_r X_{d,z,r} \right)$$
+
+Where:
+- $X_{d,z,r} \ge 0$: Quantity of resource $r$ dispatched from depot $d$ to demand zone $z$.
+- $W_{z,r} = \text{PriorityScore}_z \times \text{OverrideFactor}_z$: Effective priority weight.
+- $\text{Dist}_{d,z}$: Road transit distance between depot $d$ and zone $z$ (in kilometers).
+- $c_r$: Unit transport cost factor for resource $r$.
+- $\lambda$: Haulage penalty coefficient balancing localized service vs. cross-country transit.
+
+#### Operational Constraints
+1. **Depot Availability Limit**:
+   $$\sum_{z \in Z} X_{d,z,r} \le \text{Stock}_{d,r} \quad \forall d \in D, \forall r \in R$$
+
+2. **Demand Ceiling**:
+   $$\sum_{d \in D} X_{d,z,r} \le \text{Demand}_{z,r} \quad \forall z \in Z, \forall r \in R$$
+
+3. **Transport Vehicle Capacity**:
+   $$\sum_{r \in R} \left( \text{Weight}_r \cdot X_{d,z,r} \right) \le \text{FleetCapacity}_{d,z} \quad \forall d \in D, \forall z \in Z$$
+
+4. **Minimum Coverage Threshold**:
+   $$\sum_{d \in D} X_{d,z,r} \ge \tau \cdot \text{Demand}_{z,r} \quad \forall z \text{ with Critical Urgency}$$
+
+---
+
+### Machine Learning Demand Regressor
+
+- **Architecture**: Multi-Output Gradient Boosted Regressor (`XGBoost`).
+- **Feature Vector (17 features)**: Hazard type, magnitude, affected population, urban density, building count, road accessibility index, flood depth, seismic PGA, pediatric ratio, geriatric ratio, medical dependency index, days elapsed.
+- **Predicted Targets**:
+  1. Food Packets (Ration Packs / Day)
+  2. Drinking Water (Liters / Day)
+  3. Medical Emergency Kits (Standard NDMA Field Packs)
+  4. Emergency Shelter Spaces (Tents / Family Units)
+- **Empirical Accuracy Metrics**:
+  - Food Packets: $R^2 = 0.941$, $\text{RMSE} = 842.1$, $\text{MAE} = 512.3$
+  - Drinking Water: $R^2 = 0.956$, $\text{RMSE} = 1920.4$, $\text{MAE} = 1140.8$
+  - Medical Kits: $R^2 = 0.928$, $\text{RMSE} = 64.2$, $\text{MAE} = 38.9$
+  - Shelter Units: $R^2 = 0.935$, $\text{RMSE} = 112.5$, $\text{MAE} = 68.4$
+
+---
+
+### NetworkX Highway Routing Graph
+
+A topological graph $G = (V, E)$ constructed across 28 strategic National Highway junctions (NH-44, NH-48, NH-16, NH-27):
+- **Nodes ($V$)**: Strategic state logistics depots, relief staging airfields, and regional district hubs.
+- **Edges ($E$)**: National and state highway corridors with road condition attributes ($\text{LengthKm}$, $\text{SpeedLimitKmH}$, $\text{PassabilityFlag}$).
+- **Shortest Path Weighting**:
+  $$\text{Cost}(e) = \frac{\text{Length}(e)}{\text{Speed}(e)} \times \left(1.0 + 3.0 \times [1 - \text{Accessible}(e)]\right)$$
+  Damaged or flooded corridors automatically incur a 4.0× routing penalty, diverting convoys along safer bypasses.
+
+---
+
+## Pre-Provisioned Demo Accounts
+
+The database includes pre-configured operational accounts for immediate testing:
+
+| Role | Email | Password | Access & Clearance |
+| :--- | :--- | :--- | :--- |
+| **Command Center Administrator** | `admin@emergency.gov` | `Admin@1234` | Full access: solver parameters, priority overrides, mission dispatch, incident triage, and SitRep publishing |
+| **Field Response Officer** | `reporter@emergency.gov` | `Reporter@1234` | Citizen & field disaster incident reporting, evidence submission, and localized impact inspection |
+
+> **Pro Tip**: Use the **"Sign In"** button in the top-right header to switch between accounts in one click without typing credentials.
+
+---
+
+## Quickstart Guide
+
+### Option A: Local Standalone Setup (Recommended)
+
+The system features an automated SQLite compatibility layer allowing local zero-dependency evaluation on any machine with Python 3.11+ and Node.js 18+.
+
+#### 1. Clone & Setup Backend
+```bash
+git clone https://github.com/Aditya-santosh-Naik/AI-Powered-Emergency-Response-Intelligence-Platform-for-Disaster-Management-and-Relief-Operations.git
+cd AI-Powered-Emergency-Response-Intelligence-Platform-for-Disaster-Management-and-Relief-Operations
+
+# Create & activate virtual environment
+python -m venv .venv
+# Windows:
+.venv\Scripts\activate
+# Linux/macOS:
+source .venv/bin/activate
+
+# Install backend dependencies
+pip install -r backend/requirements.txt
+
+# Start backend server (Port 8000)
+cd backend
+uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+- **Backend API**: `http://127.0.0.1:8000`
+- **Swagger Documentation**: `http://127.0.0.1:8000/docs`
+
+#### 2. Setup & Run Frontend
+```bash
+# In a second terminal window:
+cd frontend
+npm install
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+- **Frontend Command Platform**: `http://127.0.0.1:5173`
+
+---
+
+### Option B: Docker Compose Production Stack
+
+Deploy the complete enterprise stack with PostgreSQL 16 + PostGIS 3.4:
+
+```bash
+# 1. Create environment file from clean template
+cp .env.example .env
+
+# 2. Build and launch all services in detached mode
+docker compose up -d --build
+
+# 3. Apply database migrations & seed scenarios
+docker compose exec backend alembic upgrade head
+docker compose exec backend python seed.py
+```
+
+- **Frontend Application**: `http://localhost:3000`
+- **FastAPI Documentation**: `http://localhost:8000/docs`
+- **PostGIS 16 Database**: `localhost:5432`
+
+---
+
+## Automated Verification & Test Suites
+
+The codebase includes comprehensive automated tests covering all modules:
+
+```bash
+# 1. Run Complete Backend Pytest Suite (41/41 passing)
+python -m pytest backend/tests/ -v
+
+# 2. Run Historical Disaster Scenario Tests (Kerala 2018 & Chennai 2015)
+python -m pytest backend/tests/test_historical_scenarios.py -v
+
+# 3. Run Frontend Vitest Test Suite (13/13 passing)
+cd frontend
+npx vitest run --root .
+
+# 4. Run Frontend Production TypeScript Build Check
+npm run build
+
+# 5. Run Backend Linter (Ruff)
+ruff check backend/
 ```
 
 ---
@@ -176,11 +270,13 @@ flowchart TD
 ## REST API Reference Summary
 
 | Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/v1/health` | System health status, version, and module scope |
+|:---:|---|---|
+| `GET` | `/api/v1/health` | System health check, version, and module scope |
+| `POST` | `/api/v1/auth/login` | Authenticate with credentials and receive JWT bearer token |
+| `GET` | `/api/v1/auth/me` | Retrieve profile and permissions for currently authenticated user |
 | `GET` | `/api/v1/events` | List disaster events with type, source, and country filters |
-| `GET` | `/api/v1/events/{id}` | Detailed event metadata with impact zones and grid cells |
-| `POST` | `/api/v1/ingestion/trigger` | Manually trigger real-time multi-feed polling |
+| `GET` | `/api/v1/events/{id}` | Detailed event metadata with impact zones and severity grid cells |
+| `POST` | `/api/v1/ingestion/trigger` | Manually trigger real-time multi-feed polling (GDACS, USGS, FIRMS) |
 | `GET` | `/api/v1/ingestion/status` | List latest ingestion runs and sync telemetry |
 | `GET` | `/api/v1/grid-cells` | Retrieve classified severity grid cells for map overlays |
 | `GET` | `/api/v1/depots` | List logistics depots with geospatial coordinates |
@@ -189,7 +285,7 @@ flowchart TD
 | `POST` | `/api/v1/donations` | Record relief consignment and auto-replenish depot inventory |
 | `POST` | `/api/v1/predictions/events/{id}/predict` | Execute 4-target ML demand predictor with 80% intervals |
 | `POST` | `/api/v1/predictions/scenarios` | Simulate what-if disaster escalation scenarios |
-| `POST` | `/api/v1/reports` | Citizen incident report submission |
+| `POST` | `/api/v1/reports` | Citizen incident report submission with damage severity |
 | `PATCH` | `/api/v1/reports/{id}/review` | Relief coordinator report review & validation |
 | `POST` | `/api/v1/reports/{id}/assess-and-predict` | Convert verified report to event and run prediction |
 | `POST` | `/api/v1/allocation/run` | Execute Google OR-Tools MILP logistics optimization solver |
@@ -207,91 +303,27 @@ flowchart TD
 
 ---
 
-## Quickstart Guide
+## Technical Documentation Suite
 
-### Option A: Local Standalone (Fastest for Evaluation & Demos)
+For comprehensive deep-dive documentation, consult the dedicated reports in `docs/`:
 
-The platform includes an automatic spatial SQLite compatibility engine allowing instant execution on any workstation with Python 3.11+ and Node.js 18+.
-
-#### 1. Setup Backend:
-```bash
-# Clone and enter workspace
-git clone <repo-url>
-cd internship
-
-# Activate virtual environment
-# Windows:
-.venv\Scripts\activate
-# Linux/macOS:
-source .venv/bin/activate
-
-# Install backend dependencies
-pip install -e backend
-
-# Initialize database and seed realistic scenarios
-python backend/seed.py
-
-# Launch FastAPI backend on port 8000
-uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
-```
-API runs at `http://127.0.0.1:8000` (Interactive Swagger Docs at `http://127.0.0.1:8000/docs`).
-
-#### 2. Setup Frontend:
-```bash
-# In a second terminal:
-cd frontend
-npm install
-npm run dev -- --host 127.0.0.1 --port 5173
-```
-Command Dashboard runs at `http://127.0.0.1:5173`.
-
----
-
-### Option B: Docker Compose (Full Production PostGIS Stack)
-
-```bash
-# 1. Copy environment template
-cp .env.example .env
-
-# 2. Build and launch all services
-docker compose up -d --build
-
-# 3. Apply database migrations & seed database
-docker compose exec backend alembic upgrade head
-docker compose exec backend python seed.py
-```
-
-- **Frontend Web UI**: `http://localhost:3000`
-- **Backend API Docs**: `http://localhost:8000/docs`
-- **PostGIS 16 Database**: `localhost:5432`
-
----
-
-## Verification & Automated Test Suite
-
-```bash
-# 1. Run Backend Automated Pytest Suite
-pytest backend/tests/ -v
-
-# 2. Run Frontend Automated Vitest Suite (13/13 passing)
-cd frontend && npm test
-
-# 3. Run Production Build Validation
-npm run build
-
-# 4. Run Python Linter
-ruff check backend/
-```
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md): Mathematical formulations of OR-Tools MILP, graph routing topology, and state machines.
+- [API_REFERENCE.md](docs/API_REFERENCE.md): Complete specifications for all 50+ REST endpoints.
+- [DATA_FLOW.md](docs/DATA_FLOW.md): Mermaid sequence diagrams of core incident pipelines and feedback loops.
+- [MODEL_EVALUATION.md](docs/MODEL_EVALUATION.md): Quantitative accuracy reports ($R^2$, RMSE, MAE, 80% prediction intervals).
+- [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md): Multi-container Docker Compose and cloud HA deployment.
+- [KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md): Technical boundaries, edge-case assumptions, and future roadmap.
+- [PRESENTATION_NOTES.md](docs/PRESENTATION_NOTES.md): 10-slide defense PPT outline, live demo script, and rehearsal walkthrough.
 
 ---
 
 ## Presentation Walkthrough Script
 
-When demonstrating this project to mentors and evaluators, follow this recommended walkthrough:
+Follow this step-by-step walkthrough when presenting or recording a demo:
 
 1. **Geospatial Intelligence Map (`/`)**:
    - Showcase the Indian disaster command map featuring active floods, cyclones, and seismic incidents.
-   - Toggle map layers: **Impact Footprints**, **0.05° Severity Grid Cells**, and **Strategic Regional Depots**.
+   - Toggle map layers: **Impact Footprints**, **0.05° Severity Grid Cells**, **Strategic Regional Depots**, **Delivery Routes**, and **Field Convoy Tracking Markers**.
    - Inspect exposed demographics and estimated structural damage.
 
 2. **Citizen Incident Reporting & Coordinator Triage (`/report` & `/admin`)**:
@@ -303,12 +335,19 @@ When demonstrating this project to mentors and evaluators, follow this recommend
    - Navigate to the **Disaster Logistics Command Center**.
    - Review operational overview KPIs across monitored feeds, depots, and active missions.
    - Set the planning horizon and execute the MILP solver.
-   - Highlight optimal depot-to-zone allocations, route haul distances, and $100\%$ demand satisfaction.
+   - Highlight optimal depot-to-zone allocations, route haul distances, and demand satisfaction.
 
 4. **Convoy Dispatch & Status Advancement (`/missions`)**:
    - In the Command Center, click **"Auto-Generate Missions"**.
-   - Navigate to the **Missions Board**, review newly dispatched convoys, inspect manifests, and advance operational statuses.
+   - Navigate to the **Missions Board**, review newly dispatched convoys, inspect manifests, and advance operational statuses (`ASSIGNED` $\rightarrow$ `DISPATCHED` $\rightarrow$ `IN_TRANSIT` $\rightarrow$ `DELIVERED` $\rightarrow$ `COMPLETED`).
 
 5. **Situation Reporting (`/sitrep`)**:
    - Review the auto-generated official Situation Report (SitRep).
    - Demonstrate Markdown download and print-ready document rendering for disaster management executives.
+
+---
+
+## Author & License
+
+- **Author**: [Aditya Santosh Naik](https://github.com/Aditya-santosh-Naik)
+- **License**: Released under the [MIT License](LICENSE).

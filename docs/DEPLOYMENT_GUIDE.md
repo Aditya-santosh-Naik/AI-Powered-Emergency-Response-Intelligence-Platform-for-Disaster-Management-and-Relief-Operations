@@ -25,7 +25,7 @@ The project includes a multi-container Docker Compose configuration:
 
 1. **Clone Repository & Configure Environment**:
    ```bash
-   git clone <repo-url>
+   git clone https://github.com/Aditya-santosh-Naik/AI-Powered-Emergency-Response-Intelligence-Platform-for-Disaster-Management-and-Relief-Operations.git
    cd internship
    cp .env.example .env
    ```
